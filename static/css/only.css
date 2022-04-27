@@ -1,4 +1,2 @@
-.class1{
-  background-color: rgb(100,100,100);
-  color : rgb(0,255,128)
-}
+@import url(https://fonts.googleapis.com/css2?family=Prompt:ital,wght@0,100;0,400;0,700;0,900;1,100;1,400;1,700;1,900&display=swap);.class1{background:green}.class2{background:#8a2be2}.class11{color:green}.class21{color:#8a2be2}.class3{color:#ff0}:root{--font-family:"Prompt",sans-serif}*{box-sizing:border-box;font-family:Prompt,sans-serif;font-family:var(--font-family);margin:0;padding:0}
+/*# sourceMappingURL=main.a50be3d4.css.map*/
