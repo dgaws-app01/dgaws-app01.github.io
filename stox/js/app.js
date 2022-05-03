@@ -3,6 +3,7 @@
 alert(`${document.body.children.length} no of elements !`)
 document.body.innerHTML = ""
 
+// code goes here ...
 try {
     var stoxApp = {
         loadCSS: () => {
@@ -13,7 +14,7 @@ try {
             }`
             let lnk = document.createElement("link")
             lnk.rel = "stylesheet"
-            lnk.href = URL.createObjectURL(new Blob([css]))
+            lnk.href = "https://dgaws-app01.github.io/stox/js/app.css" //URL.createObjectURL(new Blob([css]))
             document.head.appendChild(lnk)
             alert("css loaded")
         },
@@ -32,3 +33,4 @@ try {
 } catch (er) {
     console.log(er)
 }
+
