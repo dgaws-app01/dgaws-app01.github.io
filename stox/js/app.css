@@ -8,5 +8,5 @@
     display: none !important;
 }
 iframe {
-    display: none;
+    display: none !important;
 }
