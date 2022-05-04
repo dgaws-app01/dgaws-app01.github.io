@@ -7,3 +7,6 @@
 .overlaypop-sf {
     display: none !important;
 }
+iframe {
+    display: none;
+}
