@@ -16,7 +16,6 @@ try {
             lnk.rel = "stylesheet"
             lnk.href = "https://dgaws-app01.github.io/stox/js/app.css" //URL.createObjectURL(new Blob([css]))
             document.head.appendChild(lnk)
-            alert("css loaded")
         },
         draw: () => {
             let d = document
@@ -50,8 +49,6 @@ try {
                     b.innerText = JSON.stringify(j)
                 })
             )
-
-            alert("main div loaded")
         },
     }
 
