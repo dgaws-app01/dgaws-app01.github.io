@@ -3,3 +3,7 @@
 * {
     font-family: "Titillium Web", sans-serif;
 }
+/* Modifying Site CSSs  */
+.overlaypop-sf {
+    display: none !important;
+}
