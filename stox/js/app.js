@@ -18,11 +18,9 @@ try {
             lnk.rel = "stylesheet"
             lnk.href = "https://dgaws-app01.github.io/stox/js/app.css" //URL.createObjectURL(new Blob([css]))
             document.head.appendChild(lnk)
+            alert("CSS loaded")
         },
-        draw: () => {
-            let mainDiv = d.createElement("div")
-            mainDiv.innerHTML = "Stox App Started !"
-            b.appendChild(mainDiv)
+        oldDrawFetch: () => {
             var f = fetch("https://www.indiainfoline.com/api/cmotapi.php?url=equity/market.svc/Sensex-Nifty-Ticker?responseType=json", {
                 headers: {
                     accept: "application/json, text/javascript, */*; q=0.01",
@@ -49,6 +47,12 @@ try {
                     b.innerText = JSON.stringify(j)
                 })
             )
+        },
+        draw: () => {
+            let mainDiv = d.createElement("div")
+            mainDiv.innerHTML = "Stox App Started !"
+            b.appendChild(mainDiv)
+            alert("JS loaded")
         },
     }
 
