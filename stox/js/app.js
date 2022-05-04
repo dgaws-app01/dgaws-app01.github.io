@@ -1,9 +1,11 @@
 //var s = document.createElement('script'); s.src = 'https://dgaws-app01.github.io/stox/js/app.js'; document.head.appendChild(s);
 
-alert(`${document.body.children.length} no of elements !`)
-document.body.innerHTML = ""
-
 // code goes here ...
+var d = document
+var b = d.body
+
+b.innerHTML = ""
+
 try {
     var stoxApp = {
         loadCSS: () => {
@@ -18,8 +20,6 @@ try {
             document.head.appendChild(lnk)
         },
         draw: () => {
-            let d = document
-            let b = d.body
             let mainDiv = d.createElement("div")
             mainDiv.innerHTML = "Stox App Started !"
             b.appendChild(mainDiv)
