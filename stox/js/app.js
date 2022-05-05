@@ -143,7 +143,7 @@ try {
                 ui.mainDiv = d.createElement("div")
                 ui.mainDiv.innerHTML = "Stox App Started !"
                 ui.mainDiv.id = "mainDiv"
-                ui.mainDiv.classList.add("")
+                //ui.mainDiv.classList.add("")
                 b.appendChild(mainDiv)
             }
             // root
