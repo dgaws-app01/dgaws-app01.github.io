@@ -7,6 +7,12 @@
 .overlaypop-sf {
     display: none !important;
 }
-iframe {
+/* iframe {
     display: none !important;
+} */
+
+/* UI Classes */
+#mainDiv {
+    padding: 5px;
+    display: grid;
 }
