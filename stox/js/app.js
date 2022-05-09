@@ -136,24 +136,145 @@ try {
             // Bank Nifty Current Data
         },
         draw: () => {
+            class MiniDOM {
+                /** window */
+                w = window
+                /** document */
+                me = document
+                /** document.createElement */
+                ce = document.createElement
+                /** document.head.appendChild */
+                hd = {
+                    me: document.head,
+                    ap: document.head.appendChild,
+                    ldscrpt: url => {
+                        let sc = document.createElement("script")
+                        sc.src = url
+                        document.head.appendChild(sc)
+                    },
+                    ldcss: url => {
+                        let cs = document.createElement("link")
+                        cs.rel = "stylesheet"
+                        cs.href = url
+                        document.head.appendChild(cs)
+                    },
+                }
+                bd = {
+                    me: document.body,
+                    /** document.body.appendChild */
+                    ap: document.body.appendChild,
+                    /** * document.createElement
+                     * * add default class
+                     * * document.body.appendChild
+                     * @returns {HTMLElement}*/
+                    ceap: (tag, initClass) => {
+                        let ne = document.createElement(tag)
+                        if (!!initClass && initClass != "") {
+                            ne.classList.add(initClass.split(" "))
+                        }
+                        document.body.appendChild(ne)
+                        console.log(ne)
+                        return ne
+                    },
+                }
+                /**
+                 * @param {string} sel - Selector
+                 * @param {HTMLElement} ele - Optional Element on which QuerySelector will run
+                 * @returns {[HTMLElement]} */
+                qAll = (sel, ele) => {
+                    if (ele) {
+                        if (ele.contentDocument) ele = ele.contentDocument
+                        return [...ele.querySelectorAll(sel)]
+                    }
+                    return [...document.querySelectorAll(sel)]
+                }
+                /**
+                 * @param {string} sel - Selector
+                 * @param {HTMLElement} ele - Optional Element on which QuerySelector will run
+                 * @returns {HTMLElement} */
+                q = (sel, ele) => {
+                    if (ele) {
+                        if (ele.contentDocument) ele = ele.contentDocument
+                        return ele.querySelector(sel)
+                    }
+                    return document.querySelector(sel)
+                }
+                /**
+                 * @param {HTMLElement} ele     - Element in which the new created element will be appended
+                 * @param {string} tag          - New Element's TAG Name
+                 * @param {string} initClass    - Classes to be applied for the new Element
+                 * @param {string} initValue    - Initial Value / Innet HTML of the Element
+                 * @returns {HTMLElement|HTMLDivElement|HTMLInputElement|HTMLTableElement}
+                 * * document.createElement
+                 * * add default class
+                 * * document.body.appendChild                  *
+                 * */
+                ceap = (ele, tag, initClass, initValue) => {
+                    let ne = document.createElement("div")
+                    if (initClass != "") ne.classList.add(initClass.split(" "))
+                    if (initValue) {
+                        if (tag == "div" || tag == "button") ne.innerHTML = initValue
+                        else if (tag == "input") ne.value = initValue
+                        // TO BE IMPLEMENTED for other TAGs
+                    }
+                    ele.appendChild(ne)
+                    return ne
+                }
+                /**
+                 * @param {HTMLElement} ele - ELement for which Attribute value will be modified
+                 * @param {string} atr  - Attribute Name
+                 * @param {string|number} val
+                 * @returns {string|number}
+                 * - Returns only if NO "val" is provided,
+                 * - DELETES the Attribute if val="null"
+                 */
+                attr = (ele, atr, val) => {
+                    if (val) ele.setAttribute(atr, val)
+                    else if (val === null) ele.removeAttribute(atr)
+                    else return ele.getAttribute(atr)
+                }
+                /**
+                 * @param {HTMLElement} ele - ELement for which Attribute value will be modified
+                 * @param {[{attr:string, val:string}]} atrvs  - Attribute Name, Value Pair
+                 * @returns {[{attr:string, val:string}]}
+                 * - Returns only if NO "val" is provided,
+                 * - DELETES the Attribute if val="null"
+                 */
+                attrs = (ele, atrvs) =>
+                    atrvs.map(atrv => {
+                        let { a, v } = atrv
+                        return { attr: a, val: this.attr(ele, a, v) }
+                    })
+                /**
+                 * @param {HTMLElement} parent1
+                 * @param {string} selector
+                 * @param {HTMLElement} parent2 .
+                 * * Cuts and Pastes a Element from within ONE Element to Another Element
+                 */
+                move = (parent1, selector, parent2) => {
+                    let ele = this.q(selector, parent1)
+                    if (ele) {
+                        parent2.appendChild(ele)
+                    }
+                }
+            }
+            let dom = new MiniDOM()
             let ui = {}
 
             // mainDiv
             {
-                ui.mainDiv = d.createElement("div")
+                ui.mainDiv = dom.bd.ceap("div")
                 ui.mainDiv.innerHTML = "Stox App Started !"
                 ui.mainDiv.id = "mainDiv"
                 //ui.mainDiv.classList.add("")
-                b.appendChild(mainDiv)
             }
             // root
             {
-                ui.root = document.querySelector("#root")
+                ui.root = dom.q("#root")
             }
 
             // open new nifty options window
             {
-                var w = window.open("https://pro.upstox.com/option-chain/NSE_INDEX/Nifty%20Bank", "ww1", "status=1,toolbar=1,menubar=1")
             }
 
             alert("JS loaded")
