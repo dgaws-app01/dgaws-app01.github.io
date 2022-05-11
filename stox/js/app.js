@@ -266,6 +266,8 @@ try {
                 ui.mainDiv = dom.bd.ceap("div")
                 ui.mainDiv.innerHTML = "Stox App Started !"
                 ui.mainDiv.id = "mainDiv"
+                let w = window.open("https://pro.upstox.com/option-chain/NSE_INDEX/Nifty%2050", "_blank")
+                alert(w.document.body.children.length)
                 //ui.mainDiv.classList.add("")
             }
             // root
