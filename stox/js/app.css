@@ -15,4 +15,6 @@
 #mainDiv {
     padding: 5px;
     display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: inherit;
 }
