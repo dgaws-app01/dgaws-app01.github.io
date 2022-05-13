@@ -814,13 +814,19 @@ var app_stox = {
                     await cbu._01_createNewWindows()
 
                     let i = 0
-                    //while(i<Object.keys(app_stox.ui.selectors.symbols))
+                    let symbols = Object.keys(app_stox.ui.selectors.symbols)
+                    while (i < symbols.length) {
+                        let symbol = symbols[i] //app_stox.ui.selectors.symbols.nifty50
+                        let strkPrcLst = await cbu._02_01_generateStrikePriceList(symbol, undefined, { low: 20, high: 50 })
+                        let j = 0
+                        while (j < strkPrcLst.length) {
+                            let chart = await cbu._02_02_01_getChartForAStrikePrice(symbol, strkPrcLst[j])
+                            await cbu._02_02_02_moveChart(chart)
+                            j++
+                        }
 
-                    let symbol = app_stox.ui.selectors.symbols.nifty50
-
-                    let strkPrcLst = await cbu._02_01_generateStrikePriceList(symbol, undefined, { low: 20, high: 50 })
-                    let chart = await cbu._02_02_01_getChartForAStrikePrice(symbol, strkPrcLst[0])
-                    await cbu._02_02_02_moveChart(chart)
+                        i++
+                    }
 
                     console.log(strkPrcLst)
                 },
