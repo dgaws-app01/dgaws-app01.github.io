@@ -261,23 +261,56 @@ class MiniDOM {
 
 let dom = new MiniDOM()
 
+class OptionDataClass {
+    /**
+     * @param {{date_time:{numeric : number, text: string}, symbol: string, spotPrice:number, otmDistance : number,
+     *                      strikePriceRanges : {itm : {call : {low:number, high:number}, put: {low:number, high:number} },
+     *                                          otm : {call : {low:number, high:number}, put: {low:number, high:number} },
+     *                                          pcr : {low : number, spot : number,  high : number} } ,
+     *                      pcr : { volumeRatioList : [{strikePrice : number, call : number, put:number, percentage: {call : number, put:number}}],
+     *                              oiRatioList : [{strikePrice : number, call : number, put:number, percentage: {call : number, put:number}}],
+     *                              volumeRatio : {callITM : { call : number, put:number, percentage: {call : number, put:number} },
+     *                                     callOTM : { call : number, put:number, percentage: {call : number, put:number} },
+     *                                     overall : { call : number, put:number, percentage: {call : number, put:number} } },
+     *                              oiRatio : {callITM : { call : number, put:number, percentage: {call : number, put:number} },
+     *                                     callOTM : { call : number, put:number, percentage: {call : number, put:number} },
+     *                                     overall : { call : number, put:number, percentage: {call : number, put:number}} }},
+     *                      chains : {calls : [], puts : []}}} d
+     */
+    constructor(d) {
+        /** @type {{numeric : number, text: string}} */
+        this.date_time = d.date_time
+        /** @type {string} */
+        this.symbol = d.symbol
+        /** @type {number} */
+        this.spotPrice = d.spotPrice
+        /** @type {number} */
+        this.otmDistance = d.otmDistance
+        /** @type {{itm : {call : {low:number, high:number}, put: {low:number, high:number} },
+         *                                          otm : {call : {low:number, high:number}, put: {low:number, high:number} },
+         *                                          pcr : {low : number, spot : number,  high : number}}} */
+        this.strikePriceRanges = d.strikePriceRanges
+        /** @type {{ volumeRatioList : [{strikePrice : number, call : number, put:number, percentage: {call : number, put:number}}],
+         *                              oiRatioList : [{strikePrice : number, call : number, put:number, percentage: {call : number, put:number}}],
+         *                              volumeRatio : {callITM : { call : number, put:number, percentage: {call : number, put:number} },
+         *                                     callOTM : { call : number, put:number, percentage: {call : number, put:number} },
+         *                                     overall : { call : number, put:number, percentage: {call : number, put:number} } },
+         *                              oiRatio : {callITM : { call : number, put:number, percentage: {call : number, put:number} },
+         *                                     callOTM : { call : number, put:number, percentage: {call : number, put:number} },
+         *                                     overall : { call : number, put:number, percentage: {call : number, put:number}} }}} */
+        this.pcr = d.pcr
+        /** @type {{calls : [{"Ask Price & Qty" : [], "Bid Price & Qty" : [], "IV" : [], "LTP & Change": [], "OI & Change" : [], "OI Percent": [], "Strike Price" : number, "Volume" : []}],
+         *           puts : [{"Ask Price & Qty" : [], "Bid Price & Qty" : [], "IV" : [], "LTP & Change": [], "OI & Change" : [], "OI Percent": [], "Strike Price" : number, "Volume" : []}]}} */
+        this.chains = d.chains
+    }
+}
+
 var app_stox = {
     data: {
-        nifty50: {
-            spotPrice: 0,
-            /** @type {[{ strikePrice:number, ltp:number, priceChg:number, oi:number, oiChg:number, oiPrcnt:number, livedata : [{date_time:string, price:number, volume:number, priceChg:number, volumeChg : number}] }]} */
-            /** @type {{}} */
-            optionChain: [],
-            /** @type {{livedata : [{date_time:string, pcr : number, puts : number, calls : number}]}} */
-            pcr: { livedata: [] },
-        },
-        niftyBank: {
-            spotPrice: 0,
-            /** @type {[{strikePrice:number, ltp:number, priceChg:number, oi:number, oiChg:number, oiPrcnt:number, livedata : [{date_time:string, price:number, volume:number}] }]} */
-            optionChain: [],
-            /** @type {{livedata : [{date_time:string, pcr : number, puts : number, calls : number}]}} */
-            pcr: { livedata: [] },
-        },
+        /** @type {[OptionDataClass]]} */
+        nifty50: [],
+        /** @type {[OptionDataClass]} */
+        niftyBank: [],
         optDataCols: {
             AskPriceAndQty: "Ask Price & Qty.",
             BidPriceAndQty: "Bid Price & Qty.",
@@ -314,359 +347,456 @@ var app_stox = {
             mainDiv: undefined,
             /** @type {HTMLDivElement} */
             root: undefined,
-            /** @type {[HTMLTableElement]} */
-            nifty50OptionChain: undefined,
+            /** @type {Promise<[HTMLTableElement,HTMLTableElement,HTMLTableElement]>} */
+            nifty50OptionChainTables: () => dom.qAsync(app_stox.ui.selectors.optionChainTables.allTables),
+            /** @type {[{windowName:string, window:Window}]} */
+            windows: [{ windowName: "chartWindow" }],
+            buttons: {
+                nifty50: {
+                    showOptionChainBtn: () => dom.qAsync0(app_stox.ui.selectors.optionChainOpeners.nifty50),
+                },
+                niftyBank: {
+                    showOptionChainBtn: () => dom.qAsync0(app_stox.ui.selectors.optionChainOpeners.niftyBank),
+                },
+                loadMoreButtons: {
+                    up: () => dom.qAsync0(app_stox.ui.selectors.optionChainTables.loadMoreButtons.up),
+                    down: () => dom.qAsync0(app_stox.ui.selectors.optionChainTables.loadMoreButtons.down, undefined, 2000),
+                },
+            },
         },
         actions: {
-            addMainDiv: () => {
-                let mainDiv = dom.bd.ceap("div")
-                mainDiv.innerHTML = "Stox App Started !"
-                mainDiv.id = "mainDiv"
-                return mainDiv
+            _001_initialization: {
+                addMainDiv: () => {
+                    let mainDiv = dom.bd.ceap("div")
+                    mainDiv.innerHTML = "Stox App Started !"
+                    mainDiv.id = "mainDiv"
+                    return mainDiv
+                },
+                /** @returns {Promise<[HTMLDivElement]>} */
+                getRoot: async () => await dom.qAsync(app_stox.ui.selectors.root), //dom.q("#root"),
             },
-            /** @returns {Promise<[HTMLDivElement]>} */
-            searchRoot: async () => await dom.qAsync(app_stox.ui.selectors.root), //dom.q("#root"),
-
-            /** @returns {Promise} */
-            getOptionChainsData: async () => {
-                let stepsPerSymbol = {
-                    /** @returns {Promise<HTMLElement>} */
-                    openOptionChainTables: async symbol => {
-                        let showOptionChainBtn = await dom.qAsync0(app_stox.ui.selectors.optionChainOpeners[symbol])
-                        if (showOptionChainBtn) {
+            _002_optionsDataGathering: {
+                /** @returns {Promise} */
+                getOptionChainsData: async () => {
+                    let stepsPerSymbol = {
+                        /** @returns {Promise<HTMLElement>} */
+                        openOptionChainTables: async symbol => {
+                            let showOptionChainBtn = await app_stox.ui.components.buttons[symbol].showOptionChainBtn()
                             showOptionChainBtn.click()
                             return showOptionChainBtn
-                        }
-                    },
-                    /** @returns {Promise<[callsHTable:HTMLTableElement, strikePricesHTable:HTMLTableElement, putsHTable:HTMLTableElement]>} */
-                    getExtendedHTables: async () => {
-                        /** @type {[HTMLTableElement, HTMLTableElement, HTMLTableElement]} */
-                        let [callsHTable, strikePricesHTable, putsHTable] = await dom.qAsync(app_stox.ui.selectors.optionChainTables.allTables)
-                        await dom.wait(1000)
-                        putsHTable.parentElement.scrollBy(0, -300)
-                        //console.log(putsHTable.parentElement)
+                            //let showOptionChainBtn = await dom.qAsync0(app_stox.ui.selectors.optionChainOpeners[symbol])
+                            //if (showOptionChainBtn) {
+                            //    showOptionChainBtn.click()
+                            //    return showOptionChainBtn
+                            //}
+                        },
+                        /** @returns {Promise<[callsHTable:HTMLTableElement, strikePricesHTable:HTMLTableElement, putsHTable:HTMLTableElement]>} */
+                        getExtendedHTables: async () => {
+                            /** @type {[HTMLTableElement, HTMLTableElement, HTMLTableElement]} */
+                            let [callsHTable, strikePricesHTable, putsHTable] = await app_stox.ui.components.nifty50OptionChainTables() //await dom.qAsync(app_stox.ui.selectors.optionChainTables.allTables)
+                            await dom.wait(1000)
 
-                        let loadMoreUpBtn = await dom.qAsync0(app_stox.ui.selectors.optionChainTables.loadMoreButtons.up)
-                        if (loadMoreUpBtn) {
+                            putsHTable.parentElement.scrollBy(0, -300)
+                            let loadMoreUpBtn = await app_stox.ui.components.buttons.loadMoreButtons.up() //await dom.qAsync0(app_stox.ui.selectors.optionChainTables.loadMoreButtons.up)
                             let beforeRowCount = putsHTable.rows.length
                             loadMoreUpBtn.click()
                             while (putsHTable.rows.length <= beforeRowCount) await dom.wait(200)
-                        }
 
-                        putsHTable.parentElement.scrollBy(0, 1500)
-                        let loadMoreDownBtn = await dom.qAsync0(app_stox.ui.selectors.optionChainTables.loadMoreButtons.down, undefined, 2000)
-                        if (loadMoreDownBtn) {
-                            let beforeRowCount = putsHTable.rows.length
-                            loadMoreDownBtn.click()
-                            while (putsHTable.rows.length <= beforeRowCount) await dom.wait(200)
-                        }
+                            // if (loadMoreUpBtn) {
+                            //     //app_stox.ui.components.buttons.loadMoreButtons.up = loadMoreUpBtn
+                            //     let beforeRowCount = putsHTable.rows.length
+                            //     loadMoreUpBtn.click()
+                            //     while (putsHTable.rows.length <= beforeRowCount) await dom.wait(200)
+                            // }
 
-                        return [callsHTable, strikePricesHTable, putsHTable]
-                    },
-                    /**
-                     * @param {HTMLTableElement} strikePricesHTable
-                     * @param {{calls : [], puts : []}} optRawData
-                     * @returns {Promise<{calls : [], puts : [], symbPrice: number, symbol : string}>}
-                     */
-                    getStrikePrices: async (strikePricesHTable, optRawData, symbol) => {
-                        let rows = [...strikePricesHTable.rows]
-                        rows.forEach((row, rowIdx) => {
-                            if (rowIdx > 0) {
-                                let rowIdx2 = rowIdx - 1
-                                let cells = [...row.cells]
-                                cells.forEach((cell, cellIdx) => {
-                                    let stkprc = cell.textContent
-                                    let stkprcn = cell.textContent.replace(",", "") * 1
-                                    let stkfnl
-                                    stkfnl = isNaN(stkprcn) ? (optRawData.symbPrice = `${stkprc.replace("Spot ", "").replace(",", "")}` * 1) : stkprcn
-                                    optRawData.calls[rowIdx2]["Strike Price"] = stkfnl //cell.textContent.replace(",", "") * 1
-                                    optRawData.puts[rowIdx2]["Strike Price"] = stkfnl //cell.textContent.replace(",", "") * 1
-                                })
+                            putsHTable.parentElement.scrollBy(0, 1500)
+                            let loadMoreDownBtn = await app_stox.ui.components.buttons.loadMoreButtons.down() // await dom.qAsync0(app_stox.ui.selectors.optionChainTables.loadMoreButtons.down, undefined, 2000)
+                            if (loadMoreDownBtn) {
+                                let beforeRowCountDwn = putsHTable.rows.length
+                                loadMoreDownBtn.click()
+                                while (putsHTable.rows.length <= beforeRowCountDwn) await dom.wait(200)
                             }
-                        })
-                        optRawData.symbol = symbol
-                        return optRawData
-                    },
-                    /**
-                     * @param {{calls : [], puts : [], symbPrice: number, symbol:string}} optRawData
-                     * @param {{strikePrice : {low:number, high:number}, distance:number}} criteria
-                     * @returns {Promise<{calls : [], puts : [], spotPrice: number, symbol:string,
-                     *              otmDistance : number,
-                     *              pcr : {strikePriceRange : {low : number, spot : number,  high : number},
-                     *                      callITMRange : {low : number, high : number},
-                     *                      callOTMRange : {low : number, high : number},
-                     *                      volumeRatioList : [{strikePrice : number, call : number, put:number, percentage: {call : number, put:number}}],
-                     *                      oiRatioList : [{strikePrice : number, call : number, put:number, percentage: {call : number, put:number}}],
-                     *                      volumeRatio : {callITM : { call : number, put:number, percentage: {call : number, put:number} },
-                     *                                     callOTM : { call : number, put:number, percentage: {call : number, put:number} },
-                     *                                     overall : { call : number, put:number, percentage: {call : number, put:number} } },
-                     *                      oiRatio : {callITM : { call : number, put:number, percentage: {call : number, put:number} },
-                     *                                     callOTM : { call : number, put:number, percentage: {call : number, put:number} },
-                     *                                     overall : { call : number, put:number, percentage: {call : number, put:number}} }}}>}
-                     *
-                     */
-                    getPCR: async (optRawData, criteria = { distance: 4 }) => {
-                        let noOfITM = 0,
-                            noOfOTM = -1 // ITM = In the money, OTM = Over the money
-                        let colNms = app_stox.data.optDataCols
-                        for (; noOfITM < optRawData.calls.length; noOfITM++) if (optRawData.calls[noOfITM][colNms.StrikePrice] > optRawData.symbPrice) break
-                        noOfITM--
-                        noOfOTM = optRawData.calls.length - noOfITM - 1 // Symbol Price is a row
 
-                        if (criteria.distance > optRawData.calls.length - (noOfITM + 1)) criteria.distance = optRawData.calls.length - (noOfITM + 1)
+                            // if (loadMoreDownBtn) {
+                            //     //app_stox.ui.components.buttons.loadMoreButtons.down = loadMoreDownBtn
+                            //     let beforeRowCount = putsHTable.rows.length
+                            //     loadMoreDownBtn.click()
+                            //     while (putsHTable.rows.length <= beforeRowCount) await dom.wait(200)
+                            // }
 
-                        let values = {
-                            volume: {
-                                overall: { call: 0, put: 0, percentage: { call: 0, put: 0 } },
-                                callITM: { call: 0, put: 0, percentage: { call: 0, put: 0 } },
-                                callOTM: { call: 0, put: 0, percentage: { call: 0, put: 0 } },
-                                strikePriceWise: [{ strikePrice: 0, call: 0, put: 0, percentage: { call: 0, put: 0 } }],
-                            },
-                            oi: {
-                                overall: { call: 0, put: 0, percentage: { call: 0, put: 0 } },
-                                callITM: { call: 0, put: 0, percentage: { call: 0, put: 0 } },
-                                callOTM: { call: 0, put: 0, percentage: { call: 0, put: 0 } },
-                                strikePriceWise: [{ strikePrice: 0, call: 0, put: 0, percentage: { call: 0, put: 0 } }],
-                            },
-                        }
-
-                        let totCallVol = 0,
-                            totPutVol = 0,
-                            pcrRange = {
-                                callITMRange: {
-                                    low: noOfITM - criteria.distance < 0 ? 0 : noOfITM - criteria.distance,
-                                    high: noOfITM - 1,
-                                },
-                                callOTMRange: {
-                                    low: noOfITM + 1,
-                                    high: noOfITM + criteria.distance > optRawData.calls.length ? optRawData.calls.length - 1 : noOfITM + criteria.distance,
-                                },
-                            }
-                        pcrStrikePriceRange = {
-                            low: optRawData.calls[pcrRange.callITMRange.low][colNms.StrikePrice],
-                            spot: optRawData.symbPrice,
-                            high: optRawData.calls[pcrRange.callOTMRange.high][colNms.StrikePrice],
-                        }
-
-                        let toNum = v => (isNaN(v * 1) ? 0 : v * 1)
-
-                        Object.keys(pcrRange).forEach(key => {
-                            let rng = pcrRange[key]
-                            for (let i = rng.low; i <= rng.high; i++) {
-                                let cvv = toNum(optRawData.calls[i][colNms.Volume][0]),
-                                    pvv = toNum(optRawData.puts[i][colNms.Volume][0]),
-                                    coiv = toNum(optRawData.calls[i][colNms.OIAndChange][0]),
-                                    poiv = toNum(optRawData.puts[i][colNms.OIAndChange][0]),
-                                    totv = cvv + pvv,
-                                    totoi = coiv + poiv,
-                                    itmotmarr = ["callITM", "callOTM"]
-
-                                values.volume.overall.call += cvv
-                                values.volume.overall.put += pvv
-                                values.oi.overall.call += coiv
-                                values.oi.overall.put += poiv
-
-                                itmotmarr.forEach(itmotm => {
-                                    if (key.includes(itmotm)) {
-                                        values.volume[itmotm].call += cvv
-                                        values.volume[itmotm].put += pvv
-                                        values.oi[itmotm].call += coiv
-                                        values.oi[itmotm].put += poiv
-                                    }
-                                })
-
-                                values.volume.strikePriceWise.push({
-                                    strikePrice: optRawData.calls[i][colNms.StrikePrice],
-                                    call: cvv,
-                                    put: pvv,
-                                    percentage: {
-                                        call: (cvv / totv) * 10000 * 0.0001,
-                                        put: (pvv / totv) * 10000 * 0.0001,
-                                    },
-                                })
-
-                                values.oi.strikePriceWise.push({
-                                    strikePrice: optRawData.calls[i][colNms.StrikePrice],
-                                    call: coiv,
-                                    put: poiv,
-                                    percentage: {
-                                        call: (coiv / totoi) * 10000 * 0.0001,
-                                        put: (poiv / totoi) * 10000 * 0.0001,
-                                    },
-                                })
-                            }
-                        })
-
-                        let volois = ["volume", "oi"],
-                            itmotms = ["callITM", "callOTM", "overall"]
-
-                        volois.forEach(voloi => {
-                            itmotms.forEach(itmotm => {
-                                values[voloi][itmotm].percentage.call = (values[voloi][itmotm].call / (values[voloi][itmotm].call + values[voloi][itmotm].put)) * 10000 * 0.0001
-                                values[voloi][itmotm].percentage.put = 1 - values[voloi][itmotm].percentage.call
+                            return [callsHTable, strikePricesHTable, putsHTable]
+                        },
+                        /**
+                         * @param {HTMLTableElement} strikePricesHTable
+                         * @param {{calls : [], puts : []}} optRawData
+                         * @returns {Promise<{calls : [], puts : [], symbPrice: number, symbol : string}>}
+                         */
+                        getStrikePrices: async (strikePricesHTable, optRawData, symbol) => {
+                            let rows = [...strikePricesHTable.rows]
+                            rows.forEach((row, rowIdx) => {
+                                if (rowIdx > 0) {
+                                    let rowIdx2 = rowIdx - 1
+                                    let cells = [...row.cells]
+                                    cells.forEach((cell, cellIdx) => {
+                                        let stkprc = cell.textContent
+                                        let stkprcn = cell.textContent.replace(",", "") * 1
+                                        let stkfnl
+                                        stkfnl = isNaN(stkprcn) ? (optRawData.symbPrice = `${stkprc.replace("Spot ", "").replace(",", "")}` * 1) : stkprcn
+                                        optRawData.calls[rowIdx2]["Strike Price"] = stkfnl //cell.textContent.replace(",", "") * 1
+                                        optRawData.puts[rowIdx2]["Strike Price"] = stkfnl //cell.textContent.replace(",", "") * 1
+                                    })
+                                }
                             })
-                        })
+                            optRawData.symbol = symbol
+                            return optRawData
+                        },
+                        /**
+                         * @param {{calls : [], puts : [], symbPrice: number, symbol:string}} optRawData
+                         * @param {{strikePrice : {low:number, high:number}, distance:number}} criteria
+                         * @returns {Promise<{calls : [], puts : [], spotPrice: number, symbol:string,
+                         *              otmDistance : number,
+                         *              pcr : {strikePriceRange : {low : number, spot : number,  high : number},
+                         *                      callITMRange : {low : number, high : number},
+                         *                      callOTMRange : {low : number, high : number},
+                         *                      volumeRatioList : [{strikePrice : number, call : number, put:number, percentage: {call : number, put:number}}],
+                         *                      oiRatioList : [{strikePrice : number, call : number, put:number, percentage: {call : number, put:number}}],
+                         *                      volumeRatio : {callITM : { call : number, put:number, percentage: {call : number, put:number} },
+                         *                                     callOTM : { call : number, put:number, percentage: {call : number, put:number} },
+                         *                                     overall : { call : number, put:number, percentage: {call : number, put:number} } },
+                         *                      oiRatio : {callITM : { call : number, put:number, percentage: {call : number, put:number} },
+                         *                                     callOTM : { call : number, put:number, percentage: {call : number, put:number} },
+                         *                                     overall : { call : number, put:number, percentage: {call : number, put:number}} }}}>}
+                         *
+                         */
+                        getPCR: async (optRawData, criteria = { distance: 4 }) => {
+                            let noOfITM = 0,
+                                noOfOTM = -1 // ITM = In the money, OTM = Over the money
+                            let colNms = app_stox.data.optDataCols
+                            for (; noOfITM < optRawData.calls.length; noOfITM++) if (optRawData.calls[noOfITM][colNms.StrikePrice] > optRawData.symbPrice) break
+                            noOfITM--
+                            noOfOTM = optRawData.calls.length - noOfITM - 1 // Symbol Price is a row
 
-                        return {
-                            symbol: optRawData.symbol,
-                            spotPrice: optRawData.symbPrice,
-                            otmDistance: criteria.distance,
-                            calls: optRawData.calls,
-                            puts: optRawData.puts,
-                            pcr: {
-                                strikePriceRange: pcrStrikePriceRange,
-                                callITMRange: pcrRange.callITMRange,
-                                callOTMRange: pcrRange.callOTMRange,
+                            if (criteria.distance > optRawData.calls.length - (noOfITM + 1)) criteria.distance = optRawData.calls.length - (noOfITM + 1)
 
-                                totalVolume: {
-                                    calls: totCallVol,
-                                    puts: totPutVol,
+                            let values = {
+                                volume: {
+                                    overall: { call: 0, put: 0, percentage: { call: 0, put: 0 } },
+                                    callITM: { call: 0, put: 0, percentage: { call: 0, put: 0 } },
+                                    callOTM: { call: 0, put: 0, percentage: { call: 0, put: 0 } },
+                                    strikePriceWise: [{ strikePrice: 0, call: 0, put: 0, percentage: { call: 0, put: 0 } }],
                                 },
-                                volumeRatioList: values.volume.strikePriceWise,
-                                oiRatioList: values.oi.strikePriceWise,
-                                volumeRatio: {
-                                    callITM: values.volume.callITM,
-                                    callOTM: values.volume.callOTM,
-                                    overall: values.volume.overall,
+                                oi: {
+                                    overall: { call: 0, put: 0, percentage: { call: 0, put: 0 } },
+                                    callITM: { call: 0, put: 0, percentage: { call: 0, put: 0 } },
+                                    callOTM: { call: 0, put: 0, percentage: { call: 0, put: 0 } },
+                                    strikePriceWise: [{ strikePrice: 0, call: 0, put: 0, percentage: { call: 0, put: 0 } }],
                                 },
-                                oiRatio: {
-                                    callITM: values.oi.callITM,
-                                    callOTM: values.oi.callOTM,
-                                    overall: values.oi.overall,
-                                },
-                                //value: totPutVol / totCallVol, // * 10000 * 0.0001,
-                            },
-                        }
-                        //console.log({ optRawData, noOfITM, noOfOTM, criteria, pcrRange, pcrStrikePriceRange, totPutVol, totCallVol, pcr: Math.round((totPutVol / totCallVol) * 10000) * 0.01 })
-                    },
-                    /**
-                     * @param {{calls : [], puts : [], spotPrice: number, symbol:string,
-                     *              otmDistance : number,
-                     *              pcr : {strikePriceRange : {low : number, spot : number,  high : number},
-                     *                      callITMRange : {low : number, high : number},
-                     *                      callOTMRange : {low : number, high : number},
-                     *                      volumeRatioList : [{strikePrice : number, call : number, put:number, percentage: {call : number, put:number}}],
-                     *                      oiRatioList : [{strikePrice : number, call : number, put:number, percentage: {call : number, put:number}}],
-                     *                      volumeRatio : {callITM : { call : number, put:number, percentage: {call : number, put:number} },
-                     *                                     callOTM : { call : number, put:number, percentage: {call : number, put:number} },
-                     *                                     overall : { call : number, put:number, percentage: {call : number, put:number} } },
-                     *                      oiRatio : {callITM : { call : number, put:number, percentage: {call : number, put:number} },
-                     *                                     callOTM : { call : number, put:number, percentage: {call : number, put:number} },
-                     *                                     overall : { call : number, put:number, percentage: {call : number, put:number}} }}}} getPCROutput
-                     * @returns {Promise<{date_time:{numeric : number, text: string}, symbol: string, spotPrice:number, otmDistance : number,
-                     *                      strikePriceRanges : {itm : {call : {low:number, high:number}, put: {low:number, high:number} },
-                     *                                          otm : {call : {low:number, high:number}, put: {low:number, high:number} },
-                     *                                          pcr : {low : number, spot : number,  high : number} } ,
-                     *                      pcr : { volumeRatioList : [{strikePrice : number, call : number, put:number, percentage: {call : number, put:number}}],
-                     *                              oiRatioList : [{strikePrice : number, call : number, put:number, percentage: {call : number, put:number}}],
-                     *                              volumeRatio : {callITM : { call : number, put:number, percentage: {call : number, put:number} },
-                     *                                     callOTM : { call : number, put:number, percentage: {call : number, put:number} },
-                     *                                     overall : { call : number, put:number, percentage: {call : number, put:number} } },
-                     *                              oiRatio : {callITM : { call : number, put:number, percentage: {call : number, put:number} },
-                     *                                     callOTM : { call : number, put:number, percentage: {call : number, put:number} },
-                     *                                     overall : { call : number, put:number, percentage: {call : number, put:number}} }},
-                     *                      chains : {calls : [], puts : []}  }>}
-                     */
-                    finalize: async getPCROutput => {
-                        let rtv = {
-                            symbol: getPCROutput.symbol,
-                            spotPrice: getPCROutput.spotPrice,
-                            date_time: {
-                                numeric: Date.now(),
-                                text: new Date().toISOString(),
-                            },
-                            otmDistance: getPCROutput.otmDistance,
-                            strikePriceRanges: {
-                                itm: {
-                                    call: {
-                                        low: getPCROutput.calls[getPCROutput.pcr.callITMRange.high][app_stox.data.optDataCols.StrikePrice],
-                                        high: getPCROutput.calls[getPCROutput.pcr.callITMRange.low][app_stox.data.optDataCols.StrikePrice],
+                            }
+
+                            let totCallVol = 0,
+                                totPutVol = 0,
+                                pcrRange = {
+                                    callITMRange: {
+                                        low: noOfITM - criteria.distance < 0 ? 0 : noOfITM - criteria.distance,
+                                        high: noOfITM - 1,
                                     },
-                                    put: {
-                                        low: getPCROutput.calls[getPCROutput.pcr.callOTMRange.low][app_stox.data.optDataCols.StrikePrice],
-                                        high: getPCROutput.calls[getPCROutput.pcr.callOTMRange.high][app_stox.data.optDataCols.StrikePrice],
+                                    callOTMRange: {
+                                        low: noOfITM + 1,
+                                        high: noOfITM + criteria.distance > optRawData.calls.length ? optRawData.calls.length - 1 : noOfITM + criteria.distance,
                                     },
+                                }
+                            pcrStrikePriceRange = {
+                                low: optRawData.calls[pcrRange.callITMRange.low][colNms.StrikePrice],
+                                spot: optRawData.symbPrice,
+                                high: optRawData.calls[pcrRange.callOTMRange.high][colNms.StrikePrice],
+                            }
+
+                            let toNum = v => (isNaN(v * 1) ? 0 : v * 1)
+
+                            Object.keys(pcrRange).forEach(key => {
+                                let rng = pcrRange[key]
+                                for (let i = rng.low; i <= rng.high; i++) {
+                                    let cvv = toNum(optRawData.calls[i][colNms.Volume][0]),
+                                        pvv = toNum(optRawData.puts[i][colNms.Volume][0]),
+                                        coiv = toNum(optRawData.calls[i][colNms.OIAndChange][0]),
+                                        poiv = toNum(optRawData.puts[i][colNms.OIAndChange][0]),
+                                        totv = cvv + pvv,
+                                        totoi = coiv + poiv,
+                                        itmotmarr = ["callITM", "callOTM"]
+
+                                    values.volume.overall.call += cvv
+                                    values.volume.overall.put += pvv
+                                    values.oi.overall.call += coiv
+                                    values.oi.overall.put += poiv
+
+                                    itmotmarr.forEach(itmotm => {
+                                        if (key.includes(itmotm)) {
+                                            values.volume[itmotm].call += cvv
+                                            values.volume[itmotm].put += pvv
+                                            values.oi[itmotm].call += coiv
+                                            values.oi[itmotm].put += poiv
+                                        }
+                                    })
+
+                                    values.volume.strikePriceWise.push({
+                                        strikePrice: optRawData.calls[i][colNms.StrikePrice],
+                                        call: cvv,
+                                        put: pvv,
+                                        percentage: {
+                                            call: (cvv / totv) * 10000 * 0.0001,
+                                            put: (pvv / totv) * 10000 * 0.0001,
+                                        },
+                                    })
+
+                                    values.oi.strikePriceWise.push({
+                                        strikePrice: optRawData.calls[i][colNms.StrikePrice],
+                                        call: coiv,
+                                        put: poiv,
+                                        percentage: {
+                                            call: (coiv / totoi) * 10000 * 0.0001,
+                                            put: (poiv / totoi) * 10000 * 0.0001,
+                                        },
+                                    })
+                                }
+                            })
+
+                            let volois = ["volume", "oi"],
+                                itmotms = ["callITM", "callOTM", "overall"]
+
+                            volois.forEach(voloi => {
+                                itmotms.forEach(itmotm => {
+                                    values[voloi][itmotm].percentage.call = (values[voloi][itmotm].call / (values[voloi][itmotm].call + values[voloi][itmotm].put)) * 10000 * 0.0001
+                                    values[voloi][itmotm].percentage.put = 1 - values[voloi][itmotm].percentage.call
+                                })
+                            })
+
+                            return {
+                                symbol: optRawData.symbol,
+                                spotPrice: optRawData.symbPrice,
+                                otmDistance: criteria.distance,
+                                calls: optRawData.calls,
+                                puts: optRawData.puts,
+                                pcr: {
+                                    strikePriceRange: pcrStrikePriceRange,
+                                    callITMRange: pcrRange.callITMRange,
+                                    callOTMRange: pcrRange.callOTMRange,
+
+                                    totalVolume: {
+                                        calls: totCallVol,
+                                        puts: totPutVol,
+                                    },
+                                    volumeRatioList: values.volume.strikePriceWise,
+                                    oiRatioList: values.oi.strikePriceWise,
+                                    volumeRatio: {
+                                        callITM: values.volume.callITM,
+                                        callOTM: values.volume.callOTM,
+                                        overall: values.volume.overall,
+                                    },
+                                    oiRatio: {
+                                        callITM: values.oi.callITM,
+                                        callOTM: values.oi.callOTM,
+                                        overall: values.oi.overall,
+                                    },
+                                    //value: totPutVol / totCallVol, // * 10000 * 0.0001,
                                 },
-                                otm: {
-                                    call: {
-                                        low: getPCROutput.calls[getPCROutput.pcr.callOTMRange.high][app_stox.data.optDataCols.StrikePrice],
-                                        high: getPCROutput.calls[getPCROutput.pcr.callOTMRange.low][app_stox.data.optDataCols.StrikePrice],
+                            }
+                            //console.log({ optRawData, noOfITM, noOfOTM, criteria, pcrRange, pcrStrikePriceRange, totPutVol, totCallVol, pcr: Math.round((totPutVol / totCallVol) * 10000) * 0.01 })
+                        },
+                        /**
+                         * @param {{calls : [], puts : [], spotPrice: number, symbol:string,
+                         *              otmDistance : number,
+                         *              pcr : {strikePriceRange : {low : number, spot : number,  high : number},
+                         *                      callITMRange : {low : number, high : number},
+                         *                      callOTMRange : {low : number, high : number},
+                         *                      volumeRatioList : [{strikePrice : number, call : number, put:number, percentage: {call : number, put:number}}],
+                         *                      oiRatioList : [{strikePrice : number, call : number, put:number, percentage: {call : number, put:number}}],
+                         *                      volumeRatio : {callITM : { call : number, put:number, percentage: {call : number, put:number} },
+                         *                                     callOTM : { call : number, put:number, percentage: {call : number, put:number} },
+                         *                                     overall : { call : number, put:number, percentage: {call : number, put:number} } },
+                         *                      oiRatio : {callITM : { call : number, put:number, percentage: {call : number, put:number} },
+                         *                                     callOTM : { call : number, put:number, percentage: {call : number, put:number} },
+                         *                                     overall : { call : number, put:number, percentage: {call : number, put:number}} }}}} getPCROutput
+                         * @returns {Promise<OptionDataClass>}>}
+                         */
+                        finalize: async getPCROutput => {
+                            let rtv = {
+                                symbol: getPCROutput.symbol,
+                                spotPrice: getPCROutput.spotPrice,
+                                date_time: {
+                                    numeric: Date.now(),
+                                    text: new Date().toISOString(),
+                                },
+                                otmDistance: getPCROutput.otmDistance,
+                                strikePriceRanges: {
+                                    itm: {
+                                        call: {
+                                            low: getPCROutput.calls[getPCROutput.pcr.callITMRange.high][app_stox.data.optDataCols.StrikePrice],
+                                            high: getPCROutput.calls[getPCROutput.pcr.callITMRange.low][app_stox.data.optDataCols.StrikePrice],
+                                        },
+                                        put: {
+                                            low: getPCROutput.calls[getPCROutput.pcr.callOTMRange.low][app_stox.data.optDataCols.StrikePrice],
+                                            high: getPCROutput.calls[getPCROutput.pcr.callOTMRange.high][app_stox.data.optDataCols.StrikePrice],
+                                        },
                                     },
-                                    put: {
-                                        low: getPCROutput.calls[getPCROutput.pcr.callITMRange.low][app_stox.data.optDataCols.StrikePrice],
-                                        high: getPCROutput.calls[getPCROutput.pcr.callITMRange.high][app_stox.data.optDataCols.StrikePrice],
+                                    otm: {
+                                        call: {
+                                            low: getPCROutput.calls[getPCROutput.pcr.callOTMRange.high][app_stox.data.optDataCols.StrikePrice],
+                                            high: getPCROutput.calls[getPCROutput.pcr.callOTMRange.low][app_stox.data.optDataCols.StrikePrice],
+                                        },
+                                        put: {
+                                            low: getPCROutput.calls[getPCROutput.pcr.callITMRange.low][app_stox.data.optDataCols.StrikePrice],
+                                            high: getPCROutput.calls[getPCROutput.pcr.callITMRange.high][app_stox.data.optDataCols.StrikePrice],
+                                        },
+                                    },
+                                    pcr: {
+                                        low: getPCROutput.pcr.strikePriceRange.low,
+                                        spot: getPCROutput.pcr.strikePriceRange.spot,
+                                        high: getPCROutput.pcr.strikePriceRange.high,
                                     },
                                 },
                                 pcr: {
-                                    low: getPCROutput.pcr.strikePriceRange.low,
-                                    spot: getPCROutput.pcr.strikePriceRange.spot,
-                                    high: getPCROutput.pcr.strikePriceRange.high,
+                                    oiRatioList: getPCROutput.pcr.oiRatioList,
+                                    oiRatio: getPCROutput.pcr.oiRatio,
+                                    volumeRatioList: getPCROutput.pcr.volumeRatioList,
+                                    volumeRatio: getPCROutput.pcr.volumeRatio,
                                 },
-                            },
-                            pcr: {
-                                oiRatioList: getPCROutput.pcr.oiRatioList,
-                                oiRatio: getPCROutput.pcr.oiRatio,
-                                volumeRatioList: getPCROutput.pcr.volumeRatioList,
-                                volumeRatio: getPCROutput.pcr.volumeRatio,
-                            },
-                            chains: {
-                                calls: getPCROutput.calls.filter(
-                                    (c, i) => (i <= getPCROutput.pcr.callITMRange.high ? getPCROutput.pcr.callITMRange.high - i : i - (getPCROutput.pcr.callITMRange.high + 2)) < 10
-                                ),
-                                puts: getPCROutput.puts.filter(
-                                    (c, i) => (i <= getPCROutput.pcr.callITMRange.high ? getPCROutput.pcr.callITMRange.high - i : i - (getPCROutput.pcr.callITMRange.high + 2)) < 10
-                                ),
-                            },
-                        }
-                        return rtv
-                    },
+                                chains: {
+                                    calls: getPCROutput.calls.filter(
+                                        (c, i) => (i <= getPCROutput.pcr.callITMRange.high ? getPCROutput.pcr.callITMRange.high - i : i - (getPCROutput.pcr.callITMRange.high + 2)) < 11
+                                    ),
+                                    puts: getPCROutput.puts.filter(
+                                        (c, i) => (i <= getPCROutput.pcr.callITMRange.high ? getPCROutput.pcr.callITMRange.high - i : i - (getPCROutput.pcr.callITMRange.high + 2)) < 11
+                                    ),
+                                },
+                            }
+
+                            return new OptionDataClass(rtv)
+                        },
+                        /**
+                         * @param {OptionDataClass} finalizeOutput
+                         */
+                        populateAppData: async finalizeOutput => {
+                            app_stox.data[finalizeOutput.symbol].push(finalizeOutput)
+                        },
+                    }
                     /**
-                     * @param {[{date_time:{numeric : number, text: string}, symbol: string, spotPrice:numbe - r, otmDistance : number,
-                     *                      strikePriceRanges : {itm : {call : {low:number, high:number}, put: {low:number, high:number} }, otm : {call : {low:number, high:number}, put: {low:number, high:number} },
-                     *                      pcr : {low : number, spot : number,  high : number} } , pcr : number, totalVolume : {calls : number, puts : number}  }]} finalizeOutput
+                     * @param {string} symbol
+                     * @returns {OptionDataClass}
                      */
-                    populateAppData: async finalizeOutput => {
-                        finalizeOutput.forEach(o => {
-                            let symbol = o.symbol
-                            app_stox.data.nifty50.optionChain.push({
-                                //strikePrice: o.sp,
-                            })
-                        })
-                    },
-                }
+                    let getIndexOptionsData = async symbol => {
+                        if (await stepsPerSymbol.openOptionChainTables(symbol)) {
+                            let [callsHTable, strikePricesHTable, putsHTable] = await stepsPerSymbol.getExtendedHTables()
+                            let optRawData = {
+                                calls: await dom.getHTMLTableDataAsJSON(callsHTable), // getHTMLTableDataAsJSON(callsHTable),
+                                puts: await dom.getHTMLTableDataAsJSON(putsHTable), //getHTMLTableDataAsJSON(putsHTable),
+                            }
+
+                            let optDataWithStkPrc = await stepsPerSymbol.getStrikePrices(strikePricesHTable, optRawData, symbol)
+                            let getPCRoutput = await stepsPerSymbol.getPCR(optDataWithStkPrc)
+
+                            let finalizedParsedData = await stepsPerSymbol.finalize(getPCRoutput)
+                            await stepsPerSymbol.populateAppData(finalizedParsedData)
+
+                            return finalizedParsedData
+                        }
+                    }
+
+                    let nifty50 = await getIndexOptionsData(app_stox.ui.selectors.symbols.nifty50)
+                    let niftyBank = await getIndexOptionsData(app_stox.ui.selectors.symbols.niftyBank)
+                    console.log("Option Chain data retrieved ", app_stox.data)
+                    //app_stox.ui.components.mainDiv.textContent = `%-ge = ${nifty50.pcr.oiRatio.callOTM.percentage.call}`
+
+                    //await stepsPerSymbol.populateAppData([nifty50, niftyBank])
+                },
+            },
+            _003_chartBuildUp: {
+                _01_createNewWindows: async () => {
+                    app_stox.ui.components.windows.forEach(w => {
+                        w.window = window.open("", w.windowName)
+                    })
+                },
                 /**
                  * @param {string} symbol
-                 * @returns {{symbol: string, currentPrice:number,
-                 *              optionsData : [{strikePrice : number,
-                 *                              call : { oi:{value:number, change:number, percent:number}, volume:{value:number}, price:{value:number, change:number} },
-                 *                              put : { oi:{value:number, change:number, percent:number}, volume:{value:number}, price:{value:number, change:number} }
-                 *                            }]
-                 *          }}
+                 * @param {number} distanceFromSpot
+                 * @param {{low : number, high : number}} priceRange
+                 * @returns {Promise<[number]>}
                  */
-                let getIndexOptionsData = async symbol => {
-                    if (await stepsPerSymbol.openOptionChainTables(symbol)) {
-                        let [callsHTable, strikePricesHTable, putsHTable] = await stepsPerSymbol.getExtendedHTables()
-                        let optRawData = {
-                            calls: await dom.getHTMLTableDataAsJSON(callsHTable), // getHTMLTableDataAsJSON(callsHTable),
-                            puts: await dom.getHTMLTableDataAsJSON(putsHTable), //getHTMLTableDataAsJSON(putsHTable),
-                        }
-
-                        let optDataWithStkPrc = await stepsPerSymbol.getStrikePrices(strikePricesHTable, optRawData, symbol)
-                        let getPCRoutput = await stepsPerSymbol.getPCR(optDataWithStkPrc)
-
-                        let finalizedParsedData = await stepsPerSymbol.finalize(getPCRoutput)
-
-                        return finalizedParsedData
+                _02_01_generateStrikePriceList: async (symbol, distanceFromSpot, priceRange) => {
+                    let lst = []
+                    let d = app_stox.data[symbol][app_stox.data[symbol].length - 1], // app_stox.data.nifty50[app_stox.data.nifty50.length - 1], //
+                        sp = d.spotPrice,
+                        cc = d.chains.calls,
+                        ditm = 0,
+                        dotm = 0
+                    if (distanceFromSpot) {
+                        let spidx = cc.map((c, i) => {
+                            if (!c.Volume[0]) return { index: i }
+                        })[0].index
+                        cc.forEach((c, i) => {
+                            if (spidx - i < distanceFromSpot) lst.push(c["Strike Price"])
+                            else if (i - spidx < distanceFromSpot) lst.push(c["Strike Price"])
+                        })
+                    } else if (priceRange) {
+                        Object.keys(d.chains)
+                            .reverse()
+                            .forEach(cc => {
+                                d.chains[cc].forEach(c => {
+                                    if (c["LTP & Change"][0] >= priceRange.low && c["LTP & Change"][0] <= priceRange.high) lst.push(c["Strike Price"])
+                                })
+                            })
                     }
-                }
+                    return lst
+                },
+                /**
+                 *  @param {string} symbol
+                 *  @param {number} strikePrice
+                 */
+                _02_02_getChartOpenerButtonForAStrikePrice: async (symbol, strikePrice) => {
+                    if (app_stox.ui.components.buttons[symbol].showOptionChainBtn) app_stox.ui.components.buttons[symbol].showOptionChainBtn.click()
 
-                let nifty50 = await getIndexOptionsData(app_stox.ui.selectors.symbols.nifty50)
-                let niftyBank = await getIndexOptionsData(app_stox.ui.selectors.symbols.niftyBank)
+                    /** @type {[HTMLTableElement, HTMLTableElement, HTMLTableElement]} */
+                    let [callsHTable, strikePricesHTable, putsHTable] = await dom.qAsync(app_stox.ui.selectors.optionChainTables.allTables)
+                    await dom.wait(1000)
+                    putsHTable.parentElement.scrollBy(0, -300)
 
-                app_stox.ui.components.mainDiv.textContent = `%-ge = ${nifty50.pcr.oiRatio.callOTM.percentage.call}`
+                    let loadMoreUpBtn = await dom.qAsync0(app_stox.ui.selectors.optionChainTables.loadMoreButtons.up)
+                    if (loadMoreUpBtn) {
+                        let beforeRowCount = putsHTable.rows.length
+                        loadMoreUpBtn.click()
+                        while (putsHTable.rows.length <= beforeRowCount) await dom.wait(200)
+                    }
 
-                //await stepsPerSymbol.populateAppData([nifty50, niftyBank])
-                console.log(nifty50, niftyBank /*, app_stox.data*/)
+                    putsHTable.parentElement.scrollBy(0, 1500)
+                    let loadMoreDownBtn = await dom.qAsync0(app_stox.ui.selectors.optionChainTables.loadMoreButtons.down, undefined, 2000)
+                    if (loadMoreDownBtn) {
+                        let beforeRowCount = putsHTable.rows.length
+                        loadMoreDownBtn.click()
+                        while (putsHTable.rows.length <= beforeRowCount) await dom.wait(200)
+                    }
+
+                    /** @type {[{index : number, price : number}]} */
+                    let strikeIndex = -1
+                    let rows = [...strikePricesHTable.rows]
+                    rows.forEach((row, rowI) => {
+                        if (row.cells.length) {
+                            if ((row.cells[0].textContent + "").replaceAll(",", "") * 1 == strikePrice) {
+                                strikeIndexList.push({ index: rowI, price })
+                            }
+                        }
+                    })
+
+                    console.log(strikePricesHTable, strikeIndexList)
+                },
+                _02_loadChartsToChartWindow: async () => {
+                    let cbu = app_stox.ui.actions._003_chartBuildUp
+                    await cbu._01_createNewWindows()
+
+                    let symbol = app_stox.ui.selectors.symbols.nifty50
+                    let strkPrcLst = await cbu._02_01_generateStrikePriceList(symbol, undefined, { low: 20, high: 50 })
+                    let chartOpenerButtons = await cbu._02_02_getChartOpenerButtons(symbol, strkPrcLst)
+
+                    console.log(strkPrcLst)
+                },
             },
         },
     },
@@ -767,11 +897,11 @@ try {
             // Bank Nifty Current Data
         },
         process: async () => {
-            app_stox.ui.components.mainDiv = app_stox.ui.actions.addMainDiv()
-            app_stox.ui.components.root = await app_stox.ui.actions.searchRoot()
-            app_stox.ui.components.nifty50OptionChain = await app_stox.ui.actions.getOptionChainsData()
+            app_stox.ui.components.mainDiv = app_stox.ui.actions._001_initialization.addMainDiv()
+            app_stox.ui.components.root = await app_stox.ui.actions._001_initialization.getRoot()
+            await app_stox.ui.actions._002_optionsDataGathering.getOptionChainsData()
 
-            //console.log(app_stox.ui.components.nifty50OptionChain)
+            await app_stox.ui.actions._003_chartBuildUp._02_loadChartsToChartWindow()
 
             // open new nifty options window
             {
