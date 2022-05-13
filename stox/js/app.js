@@ -1,3 +1,6 @@
+//var s = document.createElement('script'); s.src = 'https://dgaws-app01.github.io/stox/js/app.js'; document.head.appendChild(s);
+
+// Code Goes Here ...
 class MiniDOM {
     /** window */
     w = window
@@ -260,17 +263,20 @@ let dom = new MiniDOM()
 
 var app_stox = {
     data: {
-        nifty: {
-            /** @type {[{strikePrice:number, ltp:number, priceChg:number, oi:number, oiChg:number, oiPrcnt:number, livedata : [{date_time:string, price:number, volume:number}] }]} */
+        nifty50: {
+            spotPrice: 0,
+            /** @type {[{ strikePrice:number, ltp:number, priceChg:number, oi:number, oiChg:number, oiPrcnt:number, livedata : [{date_time:string, price:number, volume:number, priceChg:number, volumeChg : number}] }]} */
+            /** @type {{}} */
             optionChain: [],
             /** @type {{livedata : [{date_time:string, pcr : number, puts : number, calls : number}]}} */
-            puctCallRatio: { livedata: [] },
+            pcr: { livedata: [] },
         },
-        bankNifty: {
+        niftyBank: {
+            spotPrice: 0,
             /** @type {[{strikePrice:number, ltp:number, priceChg:number, oi:number, oiChg:number, oiPrcnt:number, livedata : [{date_time:string, price:number, volume:number}] }]} */
             optionChain: [],
             /** @type {{livedata : [{date_time:string, pcr : number, puts : number, calls : number}]}} */
-            puctCallRatio: { livedata: [] },
+            pcr: { livedata: [] },
         },
         optDataCols: {
             AskPriceAndQty: "Ask Price & Qty.",
@@ -297,6 +303,10 @@ var app_stox = {
                     up: { dataid: "loadMoreUpButton" },
                     down: { dataid: "loadMoreDownButton" },
                 },
+            },
+            symbols: {
+                nifty50: "nifty50",
+                niftyBank: "niftyBank",
             },
         },
         components: {
@@ -356,9 +366,9 @@ var app_stox = {
                     /**
                      * @param {HTMLTableElement} strikePricesHTable
                      * @param {{calls : [], puts : []}} optRawData
-                     * @returns {Promise<{calls : [], puts : [], symbPrice: number}>}
+                     * @returns {Promise<{calls : [], puts : [], symbPrice: number, symbol : string}>}
                      */
-                    populateStrikePrices: async (strikePricesHTable, optRawData) => {
+                    getStrikePrices: async (strikePricesHTable, optRawData, symbol) => {
                         let rows = [...strikePricesHTable.rows]
                         rows.forEach((row, rowIdx) => {
                             if (rowIdx > 0) {
@@ -374,13 +384,28 @@ var app_stox = {
                                 })
                             }
                         })
+                        optRawData.symbol = symbol
                         return optRawData
                     },
                     /**
                      * @param {{calls : [], puts : [], symbPrice: number, symbol:string}} optRawData
-                     * @param {{low:number, high:number, distance:number}} criteria
+                     * @param {{strikePrice : {low:number, high:number}, distance:number}} criteria
+                     * @returns {Promise<{calls : [], puts : [], spotPrice: number, symbol:string,
+                     *              otmDistance : number,
+                     *              pcr : {strikePriceRange : {low : number, spot : number,  high : number},
+                     *                      callITMRange : {low : number, high : number},
+                     *                      callOTMRange : {low : number, high : number},
+                     *                      volumeRatioList : [{strikePrice : number, call : number, put:number, percentage: {call : number, put:number}}],
+                     *                      oiRatioList : [{strikePrice : number, call : number, put:number, percentage: {call : number, put:number}}],
+                     *                      volumeRatio : {callITM : { call : number, put:number, percentage: {call : number, put:number} },
+                     *                                     callOTM : { call : number, put:number, percentage: {call : number, put:number} },
+                     *                                     overall : { call : number, put:number, percentage: {call : number, put:number} } },
+                     *                      oiRatio : {callITM : { call : number, put:number, percentage: {call : number, put:number} },
+                     *                                     callOTM : { call : number, put:number, percentage: {call : number, put:number} },
+                     *                                     overall : { call : number, put:number, percentage: {call : number, put:number}} }}}>}
+                     *
                      */
-                    populatePCR: async (optRawData, criteria = { distance: 15 }) => {
+                    getPCR: async (optRawData, criteria = { distance: 4 }) => {
                         let noOfITM = 0,
                             noOfOTM = -1 // ITM = In the money, OTM = Over the money
                         let colNms = app_stox.data.optDataCols
@@ -388,28 +413,225 @@ var app_stox = {
                         noOfITM--
                         noOfOTM = optRawData.calls.length - noOfITM - 1 // Symbol Price is a row
 
+                        if (criteria.distance > optRawData.calls.length - (noOfITM + 1)) criteria.distance = optRawData.calls.length - (noOfITM + 1)
+
+                        let values = {
+                            volume: {
+                                overall: { call: 0, put: 0, percentage: { call: 0, put: 0 } },
+                                callITM: { call: 0, put: 0, percentage: { call: 0, put: 0 } },
+                                callOTM: { call: 0, put: 0, percentage: { call: 0, put: 0 } },
+                                strikePriceWise: [{ strikePrice: 0, call: 0, put: 0, percentage: { call: 0, put: 0 } }],
+                            },
+                            oi: {
+                                overall: { call: 0, put: 0, percentage: { call: 0, put: 0 } },
+                                callITM: { call: 0, put: 0, percentage: { call: 0, put: 0 } },
+                                callOTM: { call: 0, put: 0, percentage: { call: 0, put: 0 } },
+                                strikePriceWise: [{ strikePrice: 0, call: 0, put: 0, percentage: { call: 0, put: 0 } }],
+                            },
+                        }
+
                         let totCallVol = 0,
                             totPutVol = 0,
-                            callITMRange = {
-                                low: noOfITM - criteria.distance < 0 ? 0 : noOfITM - criteria.distance,
-                                high: noOfITM - 1,
-                            },
-                            callOTMRange = {
-                                low: noOfITM + 1,
-                                high: noOfOTM + criteria.distance > optRawData.calls.length ? optRawData.calls.length - 1 : noOfOTM + criteria.distance,
+                            pcrRange = {
+                                callITMRange: {
+                                    low: noOfITM - criteria.distance < 0 ? 0 : noOfITM - criteria.distance,
+                                    high: noOfITM - 1,
+                                },
+                                callOTMRange: {
+                                    low: noOfITM + 1,
+                                    high: noOfITM + criteria.distance > optRawData.calls.length ? optRawData.calls.length - 1 : noOfITM + criteria.distance,
+                                },
                             }
+                        pcrStrikePriceRange = {
+                            low: optRawData.calls[pcrRange.callITMRange.low][colNms.StrikePrice],
+                            spot: optRawData.symbPrice,
+                            high: optRawData.calls[pcrRange.callOTMRange.high][colNms.StrikePrice],
+                        }
 
-                        console.log(optRawData, noOfITM, noOfOTM, criteria, callITMRange, callOTMRange)
+                        let toNum = v => (isNaN(v * 1) ? 0 : v * 1)
 
-                        //lowArrIdx =
-                        // optRawData.calls.forEach((call, callIdx)=> {
-                        //     let v
-                        //     if(criteria.distance)
-                        //         if(criteria.distance <= callIdx)
-                        //             v = call[colNms.Volume]
-                        //     else v = call[colNms.Volume]
-                        //     totCallVol = totCallVol + isNaN(v)? 0 : v
-                        // })
+                        Object.keys(pcrRange).forEach(key => {
+                            let rng = pcrRange[key]
+                            for (let i = rng.low; i <= rng.high; i++) {
+                                let cvv = toNum(optRawData.calls[i][colNms.Volume][0]),
+                                    pvv = toNum(optRawData.puts[i][colNms.Volume][0]),
+                                    coiv = toNum(optRawData.calls[i][colNms.OIAndChange][0]),
+                                    poiv = toNum(optRawData.puts[i][colNms.OIAndChange][0]),
+                                    totv = cvv + pvv,
+                                    totoi = coiv + poiv,
+                                    itmotmarr = ["callITM", "callOTM"]
+
+                                values.volume.overall.call += cvv
+                                values.volume.overall.put += pvv
+                                values.oi.overall.call += coiv
+                                values.oi.overall.put += poiv
+
+                                itmotmarr.forEach(itmotm => {
+                                    if (key.includes(itmotm)) {
+                                        values.volume[itmotm].call += cvv
+                                        values.volume[itmotm].put += pvv
+                                        values.oi[itmotm].call += coiv
+                                        values.oi[itmotm].put += poiv
+                                    }
+                                })
+
+                                values.volume.strikePriceWise.push({
+                                    strikePrice: optRawData.calls[i][colNms.StrikePrice],
+                                    call: cvv,
+                                    put: pvv,
+                                    percentage: {
+                                        call: (cvv / totv) * 10000 * 0.0001,
+                                        put: (pvv / totv) * 10000 * 0.0001,
+                                    },
+                                })
+
+                                values.oi.strikePriceWise.push({
+                                    strikePrice: optRawData.calls[i][colNms.StrikePrice],
+                                    call: coiv,
+                                    put: poiv,
+                                    percentage: {
+                                        call: (coiv / totoi) * 10000 * 0.0001,
+                                        put: (poiv / totoi) * 10000 * 0.0001,
+                                    },
+                                })
+                            }
+                        })
+
+                        let volois = ["volume", "oi"],
+                            itmotms = ["callITM", "callOTM", "overall"]
+
+                        volois.forEach(voloi => {
+                            itmotms.forEach(itmotm => {
+                                values[voloi][itmotm].percentage.call = (values[voloi][itmotm].call / (values[voloi][itmotm].call + values[voloi][itmotm].put)) * 10000 * 0.0001
+                                values[voloi][itmotm].percentage.put = 1 - values[voloi][itmotm].percentage.call
+                            })
+                        })
+
+                        return {
+                            symbol: optRawData.symbol,
+                            spotPrice: optRawData.symbPrice,
+                            otmDistance: criteria.distance,
+                            calls: optRawData.calls,
+                            puts: optRawData.puts,
+                            pcr: {
+                                strikePriceRange: pcrStrikePriceRange,
+                                callITMRange: pcrRange.callITMRange,
+                                callOTMRange: pcrRange.callOTMRange,
+
+                                totalVolume: {
+                                    calls: totCallVol,
+                                    puts: totPutVol,
+                                },
+                                volumeRatioList: values.volume.strikePriceWise,
+                                oiRatioList: values.oi.strikePriceWise,
+                                volumeRatio: {
+                                    callITM: values.volume.callITM,
+                                    callOTM: values.volume.callOTM,
+                                    overall: values.volume.overall,
+                                },
+                                oiRatio: {
+                                    callITM: values.oi.callITM,
+                                    callOTM: values.oi.callOTM,
+                                    overall: values.oi.overall,
+                                },
+                                //value: totPutVol / totCallVol, // * 10000 * 0.0001,
+                            },
+                        }
+                        //console.log({ optRawData, noOfITM, noOfOTM, criteria, pcrRange, pcrStrikePriceRange, totPutVol, totCallVol, pcr: Math.round((totPutVol / totCallVol) * 10000) * 0.01 })
+                    },
+                    /**
+                     * @param {{calls : [], puts : [], spotPrice: number, symbol:string,
+                     *              otmDistance : number,
+                     *              pcr : {strikePriceRange : {low : number, spot : number,  high : number},
+                     *                      callITMRange : {low : number, high : number},
+                     *                      callOTMRange : {low : number, high : number},
+                     *                      volumeRatioList : [{strikePrice : number, call : number, put:number, percentage: {call : number, put:number}}],
+                     *                      oiRatioList : [{strikePrice : number, call : number, put:number, percentage: {call : number, put:number}}],
+                     *                      volumeRatio : {callITM : { call : number, put:number, percentage: {call : number, put:number} },
+                     *                                     callOTM : { call : number, put:number, percentage: {call : number, put:number} },
+                     *                                     overall : { call : number, put:number, percentage: {call : number, put:number} } },
+                     *                      oiRatio : {callITM : { call : number, put:number, percentage: {call : number, put:number} },
+                     *                                     callOTM : { call : number, put:number, percentage: {call : number, put:number} },
+                     *                                     overall : { call : number, put:number, percentage: {call : number, put:number}} }}}} getPCROutput
+                     * @returns {Promise<{date_time:{numeric : number, text: string}, symbol: string, spotPrice:number, otmDistance : number,
+                     *                      strikePriceRanges : {itm : {call : {low:number, high:number}, put: {low:number, high:number} },
+                     *                                          otm : {call : {low:number, high:number}, put: {low:number, high:number} },
+                     *                                          pcr : {low : number, spot : number,  high : number} } ,
+                     *                      pcr : { volumeRatioList : [{strikePrice : number, call : number, put:number, percentage: {call : number, put:number}}],
+                     *                              oiRatioList : [{strikePrice : number, call : number, put:number, percentage: {call : number, put:number}}],
+                     *                              volumeRatio : {callITM : { call : number, put:number, percentage: {call : number, put:number} },
+                     *                                     callOTM : { call : number, put:number, percentage: {call : number, put:number} },
+                     *                                     overall : { call : number, put:number, percentage: {call : number, put:number} } },
+                     *                              oiRatio : {callITM : { call : number, put:number, percentage: {call : number, put:number} },
+                     *                                     callOTM : { call : number, put:number, percentage: {call : number, put:number} },
+                     *                                     overall : { call : number, put:number, percentage: {call : number, put:number}} }},
+                     *                      chains : {calls : [], puts : []}  }>}
+                     */
+                    finalize: async getPCROutput => {
+                        let rtv = {
+                            symbol: getPCROutput.symbol,
+                            spotPrice: getPCROutput.spotPrice,
+                            date_time: {
+                                numeric: Date.now(),
+                                text: new Date().toISOString(),
+                            },
+                            otmDistance: getPCROutput.otmDistance,
+                            strikePriceRanges: {
+                                itm: {
+                                    call: {
+                                        low: getPCROutput.calls[getPCROutput.pcr.callITMRange.high][app_stox.data.optDataCols.StrikePrice],
+                                        high: getPCROutput.calls[getPCROutput.pcr.callITMRange.low][app_stox.data.optDataCols.StrikePrice],
+                                    },
+                                    put: {
+                                        low: getPCROutput.calls[getPCROutput.pcr.callOTMRange.low][app_stox.data.optDataCols.StrikePrice],
+                                        high: getPCROutput.calls[getPCROutput.pcr.callOTMRange.high][app_stox.data.optDataCols.StrikePrice],
+                                    },
+                                },
+                                otm: {
+                                    call: {
+                                        low: getPCROutput.calls[getPCROutput.pcr.callOTMRange.high][app_stox.data.optDataCols.StrikePrice],
+                                        high: getPCROutput.calls[getPCROutput.pcr.callOTMRange.low][app_stox.data.optDataCols.StrikePrice],
+                                    },
+                                    put: {
+                                        low: getPCROutput.calls[getPCROutput.pcr.callITMRange.low][app_stox.data.optDataCols.StrikePrice],
+                                        high: getPCROutput.calls[getPCROutput.pcr.callITMRange.high][app_stox.data.optDataCols.StrikePrice],
+                                    },
+                                },
+                                pcr: {
+                                    low: getPCROutput.pcr.strikePriceRange.low,
+                                    spot: getPCROutput.pcr.strikePriceRange.spot,
+                                    high: getPCROutput.pcr.strikePriceRange.high,
+                                },
+                            },
+                            pcr: {
+                                oiRatioList: getPCROutput.pcr.oiRatioList,
+                                oiRatio: getPCROutput.pcr.oiRatio,
+                                volumeRatioList: getPCROutput.pcr.volumeRatioList,
+                                volumeRatio: getPCROutput.pcr.volumeRatio,
+                            },
+                            chains: {
+                                calls: getPCROutput.calls.filter(
+                                    (c, i) => (i <= getPCROutput.pcr.callITMRange.high ? getPCROutput.pcr.callITMRange.high - i : i - (getPCROutput.pcr.callITMRange.high + 2)) < 10
+                                ),
+                                puts: getPCROutput.puts.filter(
+                                    (c, i) => (i <= getPCROutput.pcr.callITMRange.high ? getPCROutput.pcr.callITMRange.high - i : i - (getPCROutput.pcr.callITMRange.high + 2)) < 10
+                                ),
+                            },
+                        }
+                        return rtv
+                    },
+                    /**
+                     * @param {[{date_time:{numeric : number, text: string}, symbol: string, spotPrice:numbe - r, otmDistance : number,
+                     *                      strikePriceRanges : {itm : {call : {low:number, high:number}, put: {low:number, high:number} }, otm : {call : {low:number, high:number}, put: {low:number, high:number} },
+                     *                      pcr : {low : number, spot : number,  high : number} } , pcr : number, totalVolume : {calls : number, puts : number}  }]} finalizeOutput
+                     */
+                    populateAppData: async finalizeOutput => {
+                        finalizeOutput.forEach(o => {
+                            let symbol = o.symbol
+                            app_stox.data.nifty50.optionChain.push({
+                                //strikePrice: o.sp,
+                            })
+                        })
                     },
                 }
                 /**
@@ -429,15 +651,22 @@ var app_stox = {
                             puts: await dom.getHTMLTableDataAsJSON(putsHTable), //getHTMLTableDataAsJSON(putsHTable),
                         }
 
-                        let optDataWithStkPrc = await stepsPerSymbol.populateStrikePrices(strikePricesHTable, optRawData)
-                        optDataWithStkPrc.symbol = symbol
-                        let optDataWithPCR = await stepsPerSymbol.populatePCR(optDataWithStkPrc)
-                        //console.log(optDataWithStkPrc)
+                        let optDataWithStkPrc = await stepsPerSymbol.getStrikePrices(strikePricesHTable, optRawData, symbol)
+                        let getPCRoutput = await stepsPerSymbol.getPCR(optDataWithStkPrc)
+
+                        let finalizedParsedData = await stepsPerSymbol.finalize(getPCRoutput)
+
+                        return finalizedParsedData
                     }
                 }
 
-                let nifty50 = await getIndexOptionsData("nifty50")
-                let niftyBank = await getIndexOptionsData("niftyBank")
+                let nifty50 = await getIndexOptionsData(app_stox.ui.selectors.symbols.nifty50)
+                let niftyBank = await getIndexOptionsData(app_stox.ui.selectors.symbols.niftyBank)
+
+                app_stox.ui.components.mainDiv.textContent = `%-ge = ${nifty50.pcr.oiRatio.callOTM.percentage.call}`
+
+                //await stepsPerSymbol.populateAppData([nifty50, niftyBank])
+                console.log(nifty50, niftyBank /*, app_stox.data*/)
             },
         },
     },
