@@ -336,6 +336,8 @@ var app_stox = {
                     up: { dataid: "loadMoreUpButton" },
                     down: { dataid: "loadMoreDownButton" },
                 },
+                chartOpenerButton: { dataid: "^=scripChart_" },
+                chartIframe: { tag: "iframe" },
             },
             symbols: {
                 nifty50: "nifty50",
@@ -362,6 +364,18 @@ var app_stox = {
                     up: () => dom.qAsync0(app_stox.ui.selectors.optionChainTables.loadMoreButtons.up),
                     down: () => dom.qAsync0(app_stox.ui.selectors.optionChainTables.loadMoreButtons.down, undefined, 2000),
                 },
+                /** @param {HTMLTableRowElement} optionHTable */
+                chartOpenerButton: optionHTableRow => dom.qAsync0(app_stox.ui.selectors.optionChainTables.chartOpenerButton, optionHTableRow),
+            },
+            iframes: {
+                /** @returns {Promise<HTMLIFrameElement>} */
+                chart: async () => {
+                    /** @type {HTMLIFrameElement} */
+                    let ifrm = await dom.qAsync0(app_stox.ui.selectors.optionChainTables.chartIframe)
+                    if (ifrm.name.includes("tradingview")) {
+                        return ifrm
+                    }
+                },
             },
         },
         actions: {
@@ -370,6 +384,7 @@ var app_stox = {
                     let mainDiv = dom.bd.ceap("div")
                     mainDiv.innerHTML = "Stox App Started !"
                     mainDiv.id = "mainDiv"
+
                     return mainDiv
                 },
                 /** @returns {Promise<[HTMLDivElement]>} */
@@ -382,13 +397,8 @@ var app_stox = {
                         /** @returns {Promise<HTMLElement>} */
                         openOptionChainTables: async symbol => {
                             let showOptionChainBtn = await app_stox.ui.components.buttons[symbol].showOptionChainBtn()
-                            showOptionChainBtn.click()
+                            if (showOptionChainBtn) showOptionChainBtn.click()
                             return showOptionChainBtn
-                            //let showOptionChainBtn = await dom.qAsync0(app_stox.ui.selectors.optionChainOpeners[symbol])
-                            //if (showOptionChainBtn) {
-                            //    showOptionChainBtn.click()
-                            //    return showOptionChainBtn
-                            //}
                         },
                         /** @returns {Promise<[callsHTable:HTMLTableElement, strikePricesHTable:HTMLTableElement, putsHTable:HTMLTableElement]>} */
                         getExtendedHTables: async () => {
@@ -399,15 +409,8 @@ var app_stox = {
                             putsHTable.parentElement.scrollBy(0, -300)
                             let loadMoreUpBtn = await app_stox.ui.components.buttons.loadMoreButtons.up() //await dom.qAsync0(app_stox.ui.selectors.optionChainTables.loadMoreButtons.up)
                             let beforeRowCount = putsHTable.rows.length
-                            loadMoreUpBtn.click()
+                            if (loadMoreUpBtn) loadMoreUpBtn.click()
                             while (putsHTable.rows.length <= beforeRowCount) await dom.wait(200)
-
-                            // if (loadMoreUpBtn) {
-                            //     //app_stox.ui.components.buttons.loadMoreButtons.up = loadMoreUpBtn
-                            //     let beforeRowCount = putsHTable.rows.length
-                            //     loadMoreUpBtn.click()
-                            //     while (putsHTable.rows.length <= beforeRowCount) await dom.wait(200)
-                            // }
 
                             putsHTable.parentElement.scrollBy(0, 1500)
                             let loadMoreDownBtn = await app_stox.ui.components.buttons.loadMoreButtons.down() // await dom.qAsync0(app_stox.ui.selectors.optionChainTables.loadMoreButtons.down, undefined, 2000)
@@ -416,13 +419,6 @@ var app_stox = {
                                 loadMoreDownBtn.click()
                                 while (putsHTable.rows.length <= beforeRowCountDwn) await dom.wait(200)
                             }
-
-                            // if (loadMoreDownBtn) {
-                            //     //app_stox.ui.components.buttons.loadMoreButtons.down = loadMoreDownBtn
-                            //     let beforeRowCount = putsHTable.rows.length
-                            //     loadMoreDownBtn.click()
-                            //     while (putsHTable.rows.length <= beforeRowCount) await dom.wait(200)
-                            // }
 
                             return [callsHTable, strikePricesHTable, putsHTable]
                         },
@@ -719,7 +715,7 @@ var app_stox = {
                  * @param {string} symbol
                  * @param {number} distanceFromSpot
                  * @param {{low : number, high : number}} priceRange
-                 * @returns {Promise<[number]>}
+                 * @returns {Promise<[{strikePrice: number, optionType:string}]>}
                  */
                 _02_01_generateStrikePriceList: async (symbol, distanceFromSpot, priceRange) => {
                     let lst = []
@@ -741,7 +737,7 @@ var app_stox = {
                             .reverse()
                             .forEach(cc => {
                                 d.chains[cc].forEach(c => {
-                                    if (c["LTP & Change"][0] >= priceRange.low && c["LTP & Change"][0] <= priceRange.high) lst.push(c["Strike Price"])
+                                    if (c["LTP & Change"][0] >= priceRange.low && c["LTP & Change"][0] <= priceRange.high) lst.push({ strikePrice: c["Strike Price"], optionType: cc })
                                 })
                             })
                     }
@@ -749,51 +745,82 @@ var app_stox = {
                 },
                 /**
                  *  @param {string} symbol
-                 *  @param {number} strikePrice
+                 *  @param {{strikePrice: number, optionType:string}} strikePrice
                  */
-                _02_02_getChartOpenerButtonForAStrikePrice: async (symbol, strikePrice) => {
-                    if (app_stox.ui.components.buttons[symbol].showOptionChainBtn) app_stox.ui.components.buttons[symbol].showOptionChainBtn.click()
+                _02_02_01_getChartForAStrikePrice: async (symbol, strikePrice, optionName) => {
+                    //if (app_stox.ui.components.buttons[symbol].showOptionChainBtn) app_stox.ui.components.buttons[symbol].showOptionChainBtn.click()
+                    let btn = await app_stox.ui.components.buttons.nifty50.showOptionChainBtn()
+                    if (btn) btn.click()
 
                     /** @type {[HTMLTableElement, HTMLTableElement, HTMLTableElement]} */
-                    let [callsHTable, strikePricesHTable, putsHTable] = await dom.qAsync(app_stox.ui.selectors.optionChainTables.allTables)
+                    let [callsHTable, strikePricesHTable, putsHTable] = await app_stox.ui.components.nifty50OptionChainTables() //await dom.qAsync(app_stox.ui.selectors.optionChainTables.allTables)
                     await dom.wait(1000)
-                    putsHTable.parentElement.scrollBy(0, -300)
-
-                    let loadMoreUpBtn = await dom.qAsync0(app_stox.ui.selectors.optionChainTables.loadMoreButtons.up)
-                    if (loadMoreUpBtn) {
-                        let beforeRowCount = putsHTable.rows.length
-                        loadMoreUpBtn.click()
-                        while (putsHTable.rows.length <= beforeRowCount) await dom.wait(200)
+                    let optTbls = {
+                        calls: callsHTable,
+                        puts: putsHTable,
                     }
 
+                    putsHTable.parentElement.scrollBy(0, -300)
+                    let loadMoreUpBtn = await app_stox.ui.components.buttons.loadMoreButtons.up() //await dom.qAsync0(app_stox.ui.selectors.optionChainTables.loadMoreButtons.up)
+                    if (loadMoreUpBtn) loadMoreUpBtn.click()
+                    let beforeRowCount = putsHTable.rows.length
+                    while (putsHTable.rows.length <= beforeRowCount) await dom.wait(200)
+
+                    // if (loadMoreUpBtn) {
+                    //     let beforeRowCount = putsHTable.rows.length
+                    //     loadMoreUpBtn.click()
+                    //     while (putsHTable.rows.length <= beforeRowCount) await dom.wait(200)
+                    // }
+
                     putsHTable.parentElement.scrollBy(0, 1500)
-                    let loadMoreDownBtn = await dom.qAsync0(app_stox.ui.selectors.optionChainTables.loadMoreButtons.down, undefined, 2000)
+                    let loadMoreDownBtn = await app_stox.ui.components.buttons.loadMoreButtons.down() //await dom.qAsync0(app_stox.ui.selectors.optionChainTables.loadMoreButtons.down, undefined, 2000)
                     if (loadMoreDownBtn) {
                         let beforeRowCount = putsHTable.rows.length
                         loadMoreDownBtn.click()
                         while (putsHTable.rows.length <= beforeRowCount) await dom.wait(200)
                     }
 
-                    /** @type {[{index : number, price : number}]} */
-                    let strikeIndex = -1
+                    /** @type {{index : number, price : number, btn: HTMLElement}} */
+                    let openerButton = { index: -1, price: -1, btn: undefined }
                     let rows = [...strikePricesHTable.rows]
+
                     rows.forEach((row, rowI) => {
                         if (row.cells.length) {
-                            if ((row.cells[0].textContent + "").replaceAll(",", "") * 1 == strikePrice) {
-                                strikeIndexList.push({ index: rowI, price })
+                            if ((row.cells[0].textContent + "").replaceAll(",", "") * 1 == strikePrice.strikePrice) {
+                                //strikeIndexList.push({ index: rowI, price })
+                                openerButton = {
+                                    index: rowI,
+                                    price: strikePrice.strikePrice,
+                                }
                             }
                         }
                     })
+                    openerButton.btn = await app_stox.ui.components.buttons.chartOpenerButton(optTbls[strikePrice.optionType].rows[openerButton.index])
+                    if (openerButton.btn) openerButton.btn.click()
 
-                    console.log(strikePricesHTable, strikeIndexList)
+                    await dom.wait(1000)
+                    let ifrm = await app_stox.ui.components.iframes.chart()
+                    console.log(ifrm)
+                    return ifrm
+                },
+                /**
+                 * @param {HTMLIFrameElement} ifrm
+                 */
+                _02_02_02_moveChart: async ifrm => {
+                    app_stox.ui.components.mainDiv.appendChild(ifrm)
                 },
                 _02_loadChartsToChartWindow: async () => {
                     let cbu = app_stox.ui.actions._003_chartBuildUp
                     await cbu._01_createNewWindows()
 
+                    let i = 0
+                    //while(i<Object.keys(app_stox.ui.selectors.symbols))
+
                     let symbol = app_stox.ui.selectors.symbols.nifty50
+
                     let strkPrcLst = await cbu._02_01_generateStrikePriceList(symbol, undefined, { low: 20, high: 50 })
-                    let chartOpenerButtons = await cbu._02_02_getChartOpenerButtons(symbol, strkPrcLst)
+                    let chart = await cbu._02_02_01_getChartForAStrikePrice(symbol, strkPrcLst[0])
+                    await cbu._02_02_02_moveChart(chart)
 
                     console.log(strkPrcLst)
                 },
