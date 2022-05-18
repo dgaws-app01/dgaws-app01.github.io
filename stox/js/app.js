@@ -70,7 +70,7 @@ class MiniDOM {
      */
     q = (query, parent) => {
         if (!parent) parent = document
-        if (query.xpath) return [...parent.querySelectorAll(query)]
+        if (query.xpath) return [...parent.querySelectorAll(query.xpath)]
         let attrs = [
             { name: "data-id", value: query.dataid },
             { name: "id", value: query.id },
@@ -338,6 +338,14 @@ var app_stox = {
                 },
                 chartOpenerButton: { dataid: "^=scripChart_" },
                 chartIframe: { tag: "iframe" },
+                iframes: {
+                    allIframesInsideMainDiv: { xpath: `#mainDiv > iframe` },
+                    layoutTop: { class: "*=layout__area--top" },
+                    layoutLeft: { class: `layout__area--left` },
+                    minutesButton: { xpath: `[class*="apply-common-tooltip"][data-role="button"]` },
+                    dropDownMenuInner: { xpath: `[data-name="menu-inner"]` },
+                    minute_3_dataMenu: { xpath: `[data-value="3"]` },
+                },
             },
             symbols: {
                 nifty50: "nifty50",
@@ -375,6 +383,41 @@ var app_stox = {
                     if (ifrm.name.includes("tradingview")) {
                         return ifrm
                     }
+                },
+                /** @returns {Promise<[HTMLIFrameElement]>} */
+                allIframesInsideMainDiv: async () => await dom.qAsync(app_stox.ui.selectors.optionChainTables.iframes.allIframesInsideMainDiv),
+                /**
+                 * @param {HTMLIFrameElement} ifrm
+                 * @returns {Promise<HTMLElement>} */
+                minutesDropdown_Option_3_Minute: async ifrm => {
+                    let ddc = ifrm.contentDocument
+                    let wtct = 30
+                    let ltop = await dom.qAsync0(app_stox.ui.selectors.optionChainTables.iframes.layoutTop, ddc)
+                    let mBut = await dom.qAsync0(app_stox.ui.selectors.optionChainTables.iframes.minutesButton, ltop)
+                    await dom.wait(500)
+                    mBut.click()
+                    await dom.wait(50)
+                    let ddim = await dom.qAsync0(app_stox.ui.selectors.optionChainTables.iframes.dropDownMenuInner, ddc)
+                    await dom.wait(50)
+                    let min3opt = await dom.qAsync0(app_stox.ui.selectors.optionChainTables.iframes.minute_3_dataMenu, ddim)
+                    return min3opt
+                },
+                /**
+                 * @param {HTMLIFrameElement} ifrm
+                 * @returns {Promise<HTMLElement>} */
+                layoutAreaTop: async ifrm => {
+                    let ddc = ifrm.contentDocument
+                    //let wtct = 30
+                    let ly = await dom.qAsync0(app_stox.ui.selectors.optionChainTables.iframes.layoutTop, ddc)
+                },
+                /**
+                 * @param {HTMLIFrameElement} ifrm
+                 * @returns {Promise<HTMLElement>} */
+                layoutAreaLeft: async ifrm => {
+                    let ddc = ifrm.contentDocument
+                    //let wtct = 30
+                    let ly = await dom.qAsync0(app_stox.ui.selectors.optionChainTables.iframes.layoutLeft, ddc)
+                    return ly
                 },
             },
         },
@@ -708,7 +751,7 @@ var app_stox = {
             _003_chartBuildUp: {
                 _01_createNewWindows: async () => {
                     app_stox.ui.components.windows.forEach(w => {
-                        w.window = window.open("", w.windowName)
+                        w.window = window.open("pro.upstox.com", w.windowName)
                     })
                 },
                 /**
@@ -808,6 +851,20 @@ var app_stox = {
                  */
                 _02_02_02_moveChart: async ifrm => {
                     app_stox.ui.components.mainDiv.appendChild(ifrm)
+                    // let min3but = await app_stox.ui.components.iframes.minutesDropdown_Option_3_Minute(ifrm2)
+                    // min3but.click()
+                    //await dom.wait(1500)
+                },
+                _02_02_03_formatAllIframes: async () => {
+                    let ifrms = await app_stox.ui.components.iframes.allIframesInsideMainDiv()
+                    ifrms.forEach(async ifrm => {
+                        let min3Opt = await app_stox.ui.components.iframes.minutesDropdown_Option_3_Minute(ifrm)
+                        min3Opt.click()
+                        let lyt = await app_stox.ui.components.iframes.layoutAreaTop(ifrm)
+                        let lyl = await app_stox.ui.components.iframes.layoutAreaLeft(ifrm)
+                        lyt.remove()
+                        lyl.remove()
+                    })
                 },
                 _02_loadChartsToChartWindow: async () => {
                     let cbu = app_stox.ui.actions._003_chartBuildUp
@@ -827,6 +884,8 @@ var app_stox = {
 
                         i++
                     }
+                    await cbu._02_02_03_formatAllIframes()
+                    //app_stox.ui.components.windows[0].window.document.body.appendChild(app_stox.ui.components.mainDiv)
 
                     console.log(strkPrcLst)
                 },
