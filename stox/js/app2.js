@@ -105,7 +105,7 @@ class MiniDOM {
      * */
     ceap = (ele, tag, initClass, initValue) => {
         let ne = document.createElement("div")
-        if (initClass!=undefined && initClass != "") ne.classList.add(initClass.split(" "))
+        if (initClass != undefined && initClass != "") ne.classList.add(initClass.split(" "))
         if (initValue) {
             if (tag == "div" || tag == "button") ne.innerHTML = initValue
             else if (tag == "input") ne.value = initValue
@@ -351,16 +351,16 @@ var app_stox = {
                 nifty50: "nifty50",
                 niftyBank: "niftyBank",
             },
-            nseCharts : {
-                nifty50 : {id : "NSE_INDEX-Nifty 50"},
-                niftyBank : {id : "NSE_INDEX-Nifty Bank"}
-            }
+            nseCharts: {
+                nifty50: { id: "NSE_INDEX-Nifty 50" },
+                niftyBank: { id: "NSE_INDEX-Nifty Bank" },
+            },
         },
         components: {
             /** @type {HTMLDivElement} */
             mainDiv: undefined,
-            /** @type {HTMLDivElement} */            
-            nseChartsDiv : undefined,
+            /** @type {HTMLDivElement} */
+            nseChartsDiv: undefined,
             /** @type {HTMLDivElement} */
             root: undefined,
             /** @type {Promise<[HTMLTableElement,HTMLTableElement,HTMLTableElement]>} */
@@ -432,7 +432,6 @@ var app_stox = {
                 addMainDiv: () => {
                     app_stox.ui.components.mainDiv = dom.bd.ceap("div")
                     app_stox.ui.components.nseChartsDiv = dom.ceap(app_stox.ui.components.mainDiv, "div")
-                    //mainDiv.innerHTML = "Stox App Started !"
                     app_stox.ui.components.mainDiv.id = "mainDiv"
                     app_stox.ui.components.nseChartsDiv.id = "nseChartsDiv"
 
@@ -898,29 +897,32 @@ var app_stox = {
                     console.log(strkPrcLst)
                 },
             },
-            _003_chartBuildUp : {
+            _003_chartBuildUp: {
                 /**
-                 * @param {{low : number, high:number}} priceRange 
+                 * @param {{low : number, high:number}} priceRange
                  */
-                _03_buildChart : async (priceRange) => {
+                _03_buildChart: async priceRange => {
                     let sels = app_stox.ui.selectors
                     let nseChartDiv = app_stox.ui.components.nseChartsDiv
-                    {  
-                    //nses.forEach(nse=>{
+                    {
+                        //nses.forEach(nse=>{
                         //let nse = "nifty50"
-                        {   // Drawing NSE Chart
-                            { // Find NSE Chart's button
-                                let nsebtn = await dom.qAsync0(sels.nseCharts.nifty50) //await app_stox.ui.components.buttons.nifty50.showOptionChainBtn()                    
+                        {
+                            // Drawing NSE Chart
+                            {
+                                // Find NSE Chart's button
+                                let nsebtn = await dom.qAsync0(sels.nseCharts.nifty50) //await app_stox.ui.components.buttons.nifty50.showOptionChainBtn()
                                 nsebtn.click()
-                                await dom.wait(1000)                                
+                                await dom.wait(1000)
                             }
-                            { // Append NSE Chart | Format it
+                            {
+                                // Append NSE Chart | Format it
                                 // Get NSE chart | Append it to mainDiv
                                 /** @type {HTMLIFrameElement} */
-                                let nseifrm = await dom.qAsync0({tag:"iframe"})
+                                let nseifrm = await dom.qAsync0({ tag: "iframe" })
                                 nseChartDiv.appendChild(nseifrm)
-                                nseifrm.style.height = "800px"
-                                nseifrm.style.width = "800px"
+                                nseifrm.style.height = "300px"
+                                nseifrm.style.width = "300px"
                                 await dom.wait(3000)
 
                                 /*{ // Format NSE Chart
@@ -943,18 +945,13 @@ var app_stox = {
                                     leftLayout.remove()
                                     topLayout.remove()
                                 }*/
-                                
                             }
-                            
-                            
                         }
-                        
-                    //})
-                        
-                    }
-                }
-            }
 
+                        //})
+                    }
+                },
+            },
         },
     },
 }
@@ -1060,7 +1057,7 @@ try {
 
             //await app_stox.ui.actions._003_chartBuildUp._02_loadChartsToChartWindow()
 
-            await app_stox.ui.actions._003_chartBuildUp._03_buildChart({low:15, high:40})
+            await app_stox.ui.actions._003_chartBuildUp._03_buildChart({ low: 15, high: 40 })
 
             // open new nifty options window
             {
@@ -1068,7 +1065,7 @@ try {
 
             //alert("JS loaded")
         },
-    }//
+    } //
 
     stoxApp.loadCSS()
     stoxApp.process()
