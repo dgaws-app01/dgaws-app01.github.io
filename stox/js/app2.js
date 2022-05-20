@@ -106,7 +106,7 @@ class MiniDOM {
      * * document.body.appendChild                  *
      * */
     ceap = (ele, tag, initClass, initValue) => {
-        let ne = document.createElement("div")
+        let ne = document.createElement(tag)
         if (initClass != undefined && initClass != "") ne.classList.add(initClass.split(" "))
         if (initValue) {
             if (tag == "div" || tag == "button") ne.innerHTML = initValue
@@ -390,6 +390,14 @@ var app_stox = {
                 },
                 /** @param {HTMLTableRowElement} optionHTable */
                 chartOpenerButton: optionHTableRow => dom.qAsync0(app_stox.ui.selectors.optionChainTables.chartOpenerButton, optionHTableRow),
+            },
+            appMenus: {
+                /** @type {HTMLButtonElement} */
+                reload: undefined,
+                /** @type {HTMLButtonElement} */
+                selectNifty50Charts: undefined,
+                /** @type {HTMLButtonElement} */
+                selectNiftyBankCharts: undefined,
             },
             iframes: {
                 /** @returns {Promise<HTMLIFrameElement>} */
@@ -938,9 +946,13 @@ var app_stox = {
                  */
                 _03_buildChart: async priceRange => {
                     let sels = app_stox.ui.selectors
+                    let menus = app_stox.ui.components.appMenus
+
                     let nses = ["nifty50", "niftyBank"]
                     let nseChartDiv = app_stox.ui.components.nseChartsDiv
+                    let appMenuDiv = app_stox.ui.components.optChartsDivMenu
 
+                    // Show NSE Index Charts
                     {
                         for (const nse of nses) {
                             {
@@ -988,33 +1000,61 @@ var app_stox = {
                                     // let btnmin = await dom.qAsync0({ datarole: "button" }, btnMinPrnt)
                                     // btnmin.click()
                                 }
-
-                                // Copy Other Charts
-                                {
-                                    // Open Call & Put Chart at same LTP
-                                    {
-                                        let openOptionTable = await (async () => {
-                                            let nseOptOpnr = await dom.qAsync0(sels.optionChainOpeners[nse])
-                                            nseOptOpnr.click()
-                                            await dom.wait(2000)
-                                        })()
-
-                                        let addExtractCheckBoxesToStrikePrice = await (async () => {
-                                            let tbls = await dom.qAsync({ tag: "table" })
-                                            /** @type {HTMLTableElement} */
-                                            let tbl = tbls[1]
-                                            /** @type {[HTMLTableRowElement]} */
-                                            let rows = [...tbl.rows]
-                                            for (const row of rows) {
-                                                if(row.rowIndex>0){
-                                                    let inp = dom.ceap(row, "input")
-                                                    inp.type = "checkbox"
-                                                }
-                                            }
-                                        })()
-                                    }
-                                }
                             }
+                        }
+                    }
+
+                    // Define App Menu
+                    {
+                        let addMenu = async caption => {
+                            let itm = dom.ceap(appMenuDiv, "button", "appMenuItem", caption)
+                            return itm
+                        }
+                        menus.reload = await addMenu("Reload")
+                        menus.selectNifty50Charts = await addMenu("Nifty-50 Options")
+                        menus.selectNiftyBankCharts = await addMenu("Bank Nifty Options")
+
+                        // Define Menu Handlers
+                        {
+                            // Reload Menu
+                            {
+                                menus.reload.onclick = () => {}
+                            }
+
+                            // Nifty 50 Charts Menu
+                            {
+                            }
+
+                            // Bank Nifty Charts Menu
+                            {
+                            }
+                        }
+                    }
+
+                    // Copy Other Charts
+                    {
+                        // Open Call & Put Option Chain Table
+                        {
+                            // let openOptionTable = await (async () => {
+                            //     //let nseOptOpnr = await dom.qAsync0(sels.optionChainOpeners[nse])
+                            //     //nseOptOpnr.click()
+                            //     //await dom.wait(2000)
+                            // })()
+                            // let addExtractCheckBoxesToStrikePrice = await (async () => {
+                            //     let tbls = await dom.qAsync({ tag: "table" })
+                            //     /** @type {HTMLTableElement} */
+                            //     let tbl = tbls[1]
+                            //     /** @type {[HTMLTableRowElement]} */
+                            //     let rows = [...tbl.rows]
+                            //     for (const row of rows) {
+                            //         if (row.rowIndex > 0) {
+                            //             let inp = document.createElement("input")
+                            //             inp.type = "checkbox"
+                            //             row.childNodes[0].childNodes[0].appendChild(inp)
+                            //             row.childNodes[0].childNodes[0].style.display = "inline-flex"
+                            //         }
+                            //     }
+                            // })()
                         }
                     }
                 },
