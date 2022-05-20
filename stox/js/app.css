@@ -22,7 +22,6 @@
 
 #nseChartsDiv {
     display: inline-flex;
-    height: fit-content;
 }
 
 .nseChartFormat {
