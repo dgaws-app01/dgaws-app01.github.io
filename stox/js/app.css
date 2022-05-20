@@ -32,6 +32,12 @@
     padding: 5px;
 }
 
+.optChartHolder {
+    margin: 5px;
+    padding: 5px;
+    box-shadow: 0px 0px 8px 2px rgb(180 180 180);
+}
+
 .hidden-toolbars {
     display: none !important;
 }
