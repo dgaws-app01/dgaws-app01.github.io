@@ -1072,11 +1072,11 @@ var app_stox = {
                                         let strikeTbl = tbls[1]
                                         /** @type {[HTMLTableRowElement]} */
                                         let rows = [...strikeTbl.rows]
-                                        console.log(strikeTbl, rows)
-                                        for (const row in rows) {
+                                        for (const row of rows) {
                                             if (row.rowIndex > 0) {
                                                 /** @type {HTMLInputElement} */
                                                 let inp = row.childNodes[0]?.childNodes[0]?.childNodes[1]
+
                                                 console.log(inp.checked)
                                             }
                                         }
