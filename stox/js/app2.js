@@ -398,6 +398,8 @@ var app_stox = {
                 selectNifty50Charts: undefined,
                 /** @type {HTMLButtonElement} */
                 selectNiftyBankCharts: undefined,
+                /** @type {HTMLButtonElement} */
+                loadOptionCharts: undefined,
             },
             iframes: {
                 /** @returns {Promise<HTMLIFrameElement>} */
@@ -467,9 +469,7 @@ var app_stox = {
                     })()
 
                     let format = await (async () => {
-                        let formatChartsDivMenu = await (async ele => {
-                            ele.style.height = "60px"
-                        })(cmps.optChartsDivMenu)
+                        let formatChartsDivMenu = await (async ele => {})(cmps.optChartsDivMenu)
 
                         let formatChartCallsAndPutsDiv = await (async divs => {
                             for (const div of divs) {
@@ -947,6 +947,7 @@ var app_stox = {
                 _03_buildChart: async priceRange => {
                     let sels = app_stox.ui.selectors
                     let menus = app_stox.ui.components.appMenus
+                    let cmpnts = app_stox.ui.components
 
                     let nses = ["nifty50", "niftyBank"]
                     let nseChartDiv = app_stox.ui.components.nseChartsDiv
@@ -980,7 +981,6 @@ var app_stox = {
                                     {
                                         let removeNSEHeader = await (async () => {
                                             nseifrm.classList.add("nseChartFormat")
-                                            console.log(nseDoc)
                                             let noWrapper = await dom.qAsync0({ class: "^=noWrapWrapper-" }, nseDoc)
                                             noWrapper.remove()
                                         })()
@@ -1011,8 +1011,9 @@ var app_stox = {
                             return itm
                         }
                         menus.reload = await addMenu("Reload")
-                        menus.selectNifty50Charts = await addMenu("Nifty-50 Options")
-                        menus.selectNiftyBankCharts = await addMenu("Bank Nifty Options")
+                        menus.selectNifty50Charts = await addMenu("Open Nifty-50 Options")
+                        menus.selectNiftyBankCharts = await addMenu("Open Bank Nifty Options")
+                        menus.loadOptionCharts = await addMenu("Load Option Charts ...")
 
                         // Define Menu Handlers
                         {
@@ -1023,10 +1024,64 @@ var app_stox = {
 
                             // Nifty 50 Charts Menu
                             {
+                                menus.selectNifty50Charts.onclick = async () => {
+                                    let openOptionTable = await (async () => {
+                                        let nseOptOpnr = await dom.qAsync0(sels.optionChainOpeners.nifty50)
+                                        nseOptOpnr.click()
+                                        await dom.wait(2000)
+                                    })()
+                                    let addExtractCheckBoxesToStrikePrice = await (async () => {
+                                        let tbls = await dom.qAsync({ tag: "table" })
+                                        let extendTable = await (async () => {
+                                            let pushTable = tbls[2]
+                                            pushTable.parentElement.scrollBy(0, -300)
+                                            let ldMrUpBtn = await cmpnts.buttons.loadMoreButtons.up()
+                                            ldMrUpBtn.click()
+                                            await dom.wait(3000)
+                                        })()
+
+                                        /** @type {HTMLTableElement} */
+                                        let tbl = tbls[1]
+                                        /** @type {[HTMLTableRowElement]} */
+                                        let rows = [...tbl.rows]
+                                        for (const row of rows) {
+                                            if (row.rowIndex > 0) {
+                                                let inp = document.createElement("input")
+                                                inp.type = "checkbox"
+                                                row.childNodes[0].childNodes[0].appendChild(inp)
+                                                inp.style.margin = "3px"
+                                                inp.style.padding = "3px"
+                                                row.childNodes[0].childNodes[0].style.display = "inline-flex"
+                                            }
+                                        }
+                                    })()
+                                }
                             }
 
                             // Bank Nifty Charts Menu
                             {
+                            }
+
+                            // Load Option Charts Menu
+                            {
+                                menus.loadOptionCharts.onclick = async () => {
+                                    let strikes = []
+                                    strikes = await (async () => {
+                                        let tbls = await dom.qAsync({ tag: "table" })
+                                        /** @type {HTMLTableElement} */
+                                        let strikeTbl = tbls[1]
+                                        /** @type {[HTMLTableRowElement]} */
+                                        let rows = [...strikeTbl.rows]
+                                        console.log(strikeTbl, rows)
+                                        for (const row in rows) {
+                                            if (row.rowIndex > 0) {
+                                                /** @type {HTMLInputElement} */
+                                                let inp = row.childNodes[0]?.childNodes[0]?.childNodes[1]
+                                                console.log(inp.checked)
+                                            }
+                                        }
+                                    })()
+                                }
                             }
                         }
                     }
