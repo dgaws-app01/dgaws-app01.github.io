@@ -368,6 +368,10 @@ var app_stox = {
             /** @type {HTMLDivElement} */
             optChartsDiv: undefined,
             /** @type {HTMLDivElement} */
+            optChartsCallsDiv: undefined,
+            /** @type {HTMLDivElement} */
+            optChartsPutsDiv: undefined,
+            /** @type {HTMLDivElement} */
             root: undefined,
             /** @type {Promise<[HTMLTableElement,HTMLTableElement,HTMLTableElement]>} */
             nifty50OptionChainTables: () => dom.qAsync(app_stox.ui.selectors.optionChainTables.allTables),
@@ -443,15 +447,27 @@ var app_stox = {
                         cmps.nseChartsDiv = dom.ceap(cmps.mainDiv, "div")
                         cmps.optChartsDivMenu = dom.ceap(cmps.mainDiv, "div")
                         cmps.optChartsDiv = dom.ceap(cmps.mainDiv, "div")
+                        cmps.optChartsCallsDiv = dom.ceap(cmps.optChartsDiv, "div")
+                        cmps.optChartsPutsDiv = dom.ceap(cmps.optChartsDiv, "div")
 
                         cmps.mainDiv.id = "mainDiv"
                         cmps.nseChartsDiv.id = "nseChartsDiv"
                         cmps.optChartsDivMenu.id = "optionChartMenuDiv"
                         cmps.optChartsDiv.id = "optionChartDiv"
+                        cmps.optChartsCallsDiv.id = "optionChartCallsDiv"
+                        cmps.optChartsPutsDiv.id = "optionChartPutsDiv"
                     })()
 
                     let format = await (async () => {
-                        cmps.optChartsDivMenu.style.height = "100px"
+                        let formatChartsDivMenu = await (async ele => {
+                            ele.style.height = "60px"
+                        })(cmps.optChartsDivMenu)
+
+                        let formatChartCallsAndPutsDiv = await (async divs => {
+                            for (const div of divs) {
+                                div.classList.add("optChartHolder")
+                            }
+                        })([cmps.optChartsCallsDiv, cmps.optChartsPutsDiv])
                     })()
 
                     //return mainDiv
