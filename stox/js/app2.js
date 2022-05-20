@@ -1,4 +1,4 @@
-//var s = document.createElement('script'); s.src = 'https://dgaws-app01.github.io/stox/js/app.js'; document.head.appendChild(s);
+//var s = document.createElement('script'); s.src = 'https://dgaws-app01.github.io/stox/js/app2.js'; document.head.appendChild(s);
 
 // Code Goes Here ...
 class MiniDOM {
