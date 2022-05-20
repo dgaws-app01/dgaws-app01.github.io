@@ -59,6 +59,11 @@
     background: transparent;
 }
 
+.appMenuItem:hover {
+    color: blue;
+    box-shadow: 0px 0px 4px 1px rgb(225 225 225);
+}
+
 .hidden-toolbars {
     display: none !important;
 }
