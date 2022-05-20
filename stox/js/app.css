@@ -39,6 +39,13 @@
     box-shadow: 0px 0px 8px 2px rgb(180 180 180);
 }
 
+.appMenuItem {
+    margin: 2px;
+    padding: 2px;
+    box-shadow: 0px 0px 8px 2px rgb(69, 9, 209);
+    border-radius: 3px;
+}
+
 .hidden-toolbars {
     display: none !important;
 }
