@@ -65,7 +65,7 @@ class MiniDOM {
         return document.querySelector(sel)
     }
     /**
-     * @param {{tag:string, dataid:string, datarole:string,  id:string, class:string, attr:string, val:string, xpath:string}} query
+     * @param {{tag:string, dataid:string, datarole:string, dataname:string, id:string, class:string, attr:string, val:string, xpath:string}} query
      * @returns {[HTMLElement]}
      */
     q = (query, parent) => {
@@ -74,6 +74,7 @@ class MiniDOM {
         let attrs = [
             { name: "data-id", value: query.dataid },
             { name: "data-role", value: query.datarole },
+            { name: "data-name", value: query.dataname },
             { name: "id", value: query.id },
             { name: "class", value: query.class },
             { name: query.attr, value: query.val },
@@ -156,7 +157,7 @@ class MiniDOM {
         }
     }
     /**
-     * @param {{tag:string, dataid:string, datarole:string, id:string, class:string, attr:string, val:string, xpath:string}} query - Selector
+     * @param {{tag:string, dataid:string, datarole:string, dataname:string,  id:string, class:string, attr:string, val:string, xpath:string}} query - Selector
      * @param {HTMLElement} ele - Optional Element on which QuerySelector will run
      * @param {number} to - Timeout
      * @returns {Promise<[HTMLElement]>}
@@ -187,7 +188,7 @@ class MiniDOM {
             if (chkCt <= 0) searchEnded(undefined)
         })
     /**
-     * @param {{tag:string, dataid:string, datarole:string, id:string, class:string, attr:string, val:string, xpath:string}} query - Selector
+     * @param {{tag:string, dataid:string, datarole:string, dataname:string, id:string, class:string, attr:string, val:string, xpath:string}} query - Selector
      * @param {HTMLElement} ele - Optional Element on which QuerySelector will run
      * @param {number} to - Timeout
      * @returns {Promise<HTMLElement>}
@@ -363,6 +364,10 @@ var app_stox = {
             /** @type {HTMLDivElement} */
             nseChartsDiv: undefined,
             /** @type {HTMLDivElement} */
+            optChartsDivMenu: undefined,
+            /** @type {HTMLDivElement} */
+            optChartsDiv: undefined,
+            /** @type {HTMLDivElement} */
             root: undefined,
             /** @type {Promise<[HTMLTableElement,HTMLTableElement,HTMLTableElement]>} */
             nifty50OptionChainTables: () => dom.qAsync(app_stox.ui.selectors.optionChainTables.allTables),
@@ -430,11 +435,24 @@ var app_stox = {
         },
         actions: {
             _001_initialization: {
-                addMainDiv: () => {
-                    app_stox.ui.components.mainDiv = dom.bd.ceap("div")
-                    app_stox.ui.components.nseChartsDiv = dom.ceap(app_stox.ui.components.mainDiv, "div")
-                    app_stox.ui.components.mainDiv.id = "mainDiv"
-                    app_stox.ui.components.nseChartsDiv.id = "nseChartsDiv"
+                addMainDiv: async () => {
+                    let cmps = app_stox.ui.components
+
+                    let defineStructure = await (async () => {
+                        cmps.mainDiv = dom.bd.ceap("div")
+                        cmps.nseChartsDiv = dom.ceap(cmps.mainDiv, "div")
+                        cmps.optChartsDivMenu = dom.ceap(cmps.mainDiv, "div")
+                        cmps.optChartsDiv = dom.ceap(cmps.mainDiv, "div")
+
+                        cmps.mainDiv.id = "mainDiv"
+                        cmps.nseChartsDiv.id = "nseChartsDiv"
+                        cmps.optChartsDivMenu.id = "optionChartMenuDiv"
+                        cmps.optChartsDiv.id = "optionChartDiv"
+                    })()
+
+                    let format = await (async () => {
+                        cmps.optChartsDivMenu.style.height = "100px"
+                    })()
 
                     //return mainDiv
                 },
@@ -906,6 +924,7 @@ var app_stox = {
                     let sels = app_stox.ui.selectors
                     let nses = ["nifty50", "niftyBank"]
                     let nseChartDiv = app_stox.ui.components.nseChartsDiv
+
                     {
                         for (const nse of nses) {
                             {
@@ -923,15 +942,30 @@ var app_stox = {
                                 }
                                 {
                                     // Get NSE chart | Append it to mainDiv
-
                                     /** @type {HTMLIFrameElement} */
                                     let nseifrm = await dom.qAsync0({ tag: "iframe" })
                                     nseChartDiv.appendChild(nseifrm)
-                                    nseifrm.classList.add("nseChartFormat")
-                                    //nseifrm.style.height = "300px"
-                                    //nseifrm.style.width = "450px"
-                                    //nseifrm.style.boxShadow = "0px 0px 8px 2px rgb(180 180 180)"
                                     await dom.wait(3000)
+                                    let nseDoc = nseifrm.contentDocument
+
+                                    // Format NSE Chart
+                                    {
+                                        let removeNSEHeader = await (async () => {
+                                            nseifrm.classList.add("nseChartFormat")
+                                            console.log(nseDoc)
+                                            let noWrapper = await dom.qAsync0({ class: "^=noWrapWrapper-" }, nseDoc)
+                                            noWrapper.remove()
+                                        })()
+
+                                        let selectDateRangeTo1Day = await (async () => {
+                                            let dtRngBtn = (await dom.qAsync0({ class: "^=dateRangeWrapper" }, nseDoc)).children[0].children[0]
+                                            dtRngBtn.click()
+                                            await dom.wait(500)
+                                            let mnu = await dom.qAsync0({ dataname: "menu-inner" }, nseDoc)
+                                            let mnu1dy = mnu.children[mnu.children.length - 1]
+                                            mnu1dy.click()
+                                        })()
+                                    }
 
                                     // let lytop = await dom.qAsync0(app_stox.ui.selectors.optionChainTables.iframes.layoutTop, nseifrm.contentDocument)
                                     // let btnMinPrnt = (await dom.qAsync({ class: "^=group-" }, lytop))[1]
@@ -943,6 +977,9 @@ var app_stox = {
                                 {
                                     // Open Call & Put Chart at same LTP
                                     {
+                                        //let nseOptOpnr = await dom.qAsync0(sels.optionChainOpeners[nse])
+                                        //nseOptOpnr.click()
+                                        //await dom.wait(1000)
                                     }
                                 }
                             }
@@ -1049,7 +1086,7 @@ try {
             // Bank Nifty Current Data
         },
         process: async () => {
-            app_stox.ui.actions._001_initialization.addMainDiv()
+            await app_stox.ui.actions._001_initialization.addMainDiv()
             app_stox.ui.components.root = await app_stox.ui.actions._001_initialization.getRoot()
             //await app_stox.ui.actions._002_optionsDataGathering.getOptionChainsData()
 
