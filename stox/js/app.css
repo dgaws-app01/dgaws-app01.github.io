@@ -24,6 +24,13 @@
     display: inline-flex;
 }
 
+#optionChartMenuDiv {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr 1fr 6fr;
+    grid-template-rows: 1fr;
+    padding: 10px;
+}
+
 .nseChartFormat {
     height: 100% !important;
     width: 450px !important;
@@ -40,10 +47,13 @@
 }
 
 .appMenuItem {
-    margin: 2px;
-    padding: 2px;
-    box-shadow: 0px 0px 8px 2px rgb(69, 9, 209);
+    margin: 6px;
+    padding: 6px;
+    box-shadow: 0px 0px 1px 1px rgb(69 9 209);
     border-radius: 3px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .hidden-toolbars {
