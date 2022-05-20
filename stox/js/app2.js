@@ -993,9 +993,25 @@ var app_stox = {
                                 {
                                     // Open Call & Put Chart at same LTP
                                     {
-                                        //let nseOptOpnr = await dom.qAsync0(sels.optionChainOpeners[nse])
-                                        //nseOptOpnr.click()
-                                        //await dom.wait(1000)
+                                        let openOptionTable = await (async () => {
+                                            let nseOptOpnr = await dom.qAsync0(sels.optionChainOpeners[nse])
+                                            nseOptOpnr.click()
+                                            await dom.wait(2000)
+                                        })()
+
+                                        let addExtractCheckBoxesToStrikePrice = await (async () => {
+                                            let tbls = await dom.qAsync({ tag: "table" })
+                                            /** @type {HTMLTableElement} */
+                                            let tbl = tbls[1]
+                                            /** @type {[HTMLTableRowElement]} */
+                                            let rows = [...tbl.rows]
+                                            for (const row of rows) {
+                                                if(row.rowIndex>0){
+                                                    let inp = dom.ceap(row, "input")
+                                                    inp.type = "checkbox"
+                                                }
+                                            }
+                                        })()
                                     }
                                 }
                             }
