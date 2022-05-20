@@ -16,7 +16,7 @@
     padding: 5px;
     display: grid;
     grid-template-columns: 1fr;
-    grid-template-rows: 4fr 0.5fr 9.5fr;
+    grid-template-rows: 5fr 1fr 9fr;
     height: inherit;
 }
 
@@ -26,7 +26,7 @@
 
 #optionChartMenuDiv {
     display: grid;
-    grid-template-columns: 1fr 1fr 1fr 1fr 6fr;
+    grid-template-columns: 1fr 1fr 1fr 1fr 2fr;
     grid-template-rows: 1fr;
     padding: 10px;
 }
