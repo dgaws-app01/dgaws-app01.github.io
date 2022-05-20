@@ -16,6 +16,7 @@
     padding: 5px;
     display: grid;
     grid-template-columns: 1fr;
+    grid-template-rows: 4fr 0.5fr 9.5fr;
     height: inherit;
 }
 
