@@ -65,7 +65,7 @@ class MiniDOM {
         return document.querySelector(sel)
     }
     /**
-     * @param {{tag:string, dataid:string, id:string, class:string, attr:string, val:string, xpath:string}} query
+     * @param {{tag:string, dataid:string, datarole:string,  id:string, class:string, attr:string, val:string, xpath:string}} query
      * @returns {[HTMLElement]}
      */
     q = (query, parent) => {
@@ -73,6 +73,7 @@ class MiniDOM {
         if (query.xpath) return [...parent.querySelectorAll(query.xpath)]
         let attrs = [
             { name: "data-id", value: query.dataid },
+            { name: "data-role", value: query.datarole },
             { name: "id", value: query.id },
             { name: "class", value: query.class },
             { name: query.attr, value: query.val },
@@ -155,7 +156,7 @@ class MiniDOM {
         }
     }
     /**
-     * @param {{tag:string, dataid:string, id:string, class:string, attr:string, val:string, xpath:string}} query - Selector
+     * @param {{tag:string, dataid:string, datarole:string, id:string, class:string, attr:string, val:string, xpath:string}} query - Selector
      * @param {HTMLElement} ele - Optional Element on which QuerySelector will run
      * @param {number} to - Timeout
      * @returns {Promise<[HTMLElement]>}
@@ -186,7 +187,7 @@ class MiniDOM {
             if (chkCt <= 0) searchEnded(undefined)
         })
     /**
-     * @param {{tag:string, dataid:string, id:string, class:string, attr:string, val:string, xpath:string}} query - Selector
+     * @param {{tag:string, dataid:string, datarole:string, id:string, class:string, attr:string, val:string, xpath:string}} query - Selector
      * @param {HTMLElement} ele - Optional Element on which QuerySelector will run
      * @param {number} to - Timeout
      * @returns {Promise<HTMLElement>}
@@ -903,52 +904,49 @@ var app_stox = {
                  */
                 _03_buildChart: async priceRange => {
                     let sels = app_stox.ui.selectors
+                    let nses = ["nifty50", "niftyBank"]
                     let nseChartDiv = app_stox.ui.components.nseChartsDiv
                     {
-                        //nses.forEach(nse=>{
-                        //let nse = "nifty50"
-                        {
-                            // Drawing NSE Chart
+                        for (const nse of nses) {
                             {
-                                // Find NSE Chart's button
-                                let nsebtn = await dom.qAsync0(sels.nseCharts.nifty50) //await app_stox.ui.components.buttons.nifty50.showOptionChainBtn()
-                                nsebtn.click()
-                                await dom.wait(1000)
-                            }
-                            {
-                                // Append NSE Chart | Format it
-                                // Get NSE chart | Append it to mainDiv
-                                /** @type {HTMLIFrameElement} */
-                                let nseifrm = await dom.qAsync0({ tag: "iframe" })
-                                nseChartDiv.appendChild(nseifrm)
-                                nseifrm.style.height = "300px"
-                                nseifrm.style.width = "300px"
-                                await dom.wait(3000)
+                                //let nse = "nifty50"
+                                // Drawing NSE Charts
+                                {
+                                    // Click on Option CHain Button to enable new chart functionality from UpStox
+                                    let nseOptOpnr = await dom.qAsync0(sels.optionChainOpeners[nse])
+                                    nseOptOpnr.click()
+                                    await dom.wait(1000)
+                                    // Find NSE Chart's button
+                                    let nsebtn = await dom.qAsync0(sels.nseCharts[nse]) //await app_stox.ui.components.buttons.nifty50.showOptionChainBtn()
+                                    nsebtn.click()
+                                    await dom.wait(1000)
+                                }
+                                {
+                                    // Get NSE chart | Append it to mainDiv
 
-                                /*{ // Format NSE Chart
-                                    let trs = await dom.qAsync({tag:"tr"}, nseifrm.contentDocument)
-                                    let tbl = await dom.qAsync0({tag:"table"}, nseifrm.contentDocument)
-                                    let i = 0;
-    
-                                    console.log(trs)
-                                    for(i=1; i< trs.length-1; i++)
-                                        trs[i].remove()
+                                    /** @type {HTMLIFrameElement} */
+                                    let nseifrm = await dom.qAsync0({ tag: "iframe" })
+                                    nseChartDiv.appendChild(nseifrm)
+                                    nseifrm.classList.add("nseChartFormat")
+                                    //nseifrm.style.height = "300px"
+                                    //nseifrm.style.width = "450px"
+                                    //nseifrm.style.boxShadow = "0px 0px 8px 2px rgb(180 180 180)"
+                                    await dom.wait(3000)
 
-                                    tbl.style.removeProperty("height")
-                                    let ele1 = tbl.parentElement
-                                    for(i=1; i<=3; i++){
-                                        ele1.style.height = "300px"
-                                        ele1 = tbl.parentElement
-                                    }   
-                                    let leftLayout = await dom.qAsync0({class: "*=layout__area--left"}, nseifrm.contentDocument)
-                                    let topLayout = await dom.qAsync0({class: "*=layout__area--top"}, nseifrm.contentDocument)
-                                    leftLayout.remove()
-                                    topLayout.remove()
-                                }*/
+                                    // let lytop = await dom.qAsync0(app_stox.ui.selectors.optionChainTables.iframes.layoutTop, nseifrm.contentDocument)
+                                    // let btnMinPrnt = (await dom.qAsync({ class: "^=group-" }, lytop))[1]
+                                    // let btnmin = await dom.qAsync0({ datarole: "button" }, btnMinPrnt)
+                                    // btnmin.click()
+                                }
+
+                                // Copy Other Charts
+                                {
+                                    // Open Call & Put Chart at same LTP
+                                    {
+                                    }
+                                }
                             }
                         }
-
-                        //})
                     }
                 },
             },
