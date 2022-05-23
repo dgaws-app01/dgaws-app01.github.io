@@ -994,6 +994,7 @@ var app_stox = {
                                             mnu1dy.click()
                                         })()
                                     }
+                                    await dom.wait(3000)
 
                                     // let lytop = await dom.qAsync0(app_stox.ui.selectors.optionChainTables.iframes.layoutTop, nseifrm.contentDocument)
                                     // let btnMinPrnt = (await dom.qAsync({ class: "^=group-" }, lytop))[1]
@@ -1068,6 +1069,8 @@ var app_stox = {
                                     /** @type {[{isSpot : boolean, price : {numeric : number, txt : string}, index : number}]} */
                                     let strikes = []
                                     let nifty50OrBankNifty = "Nifty50"
+
+                                    // Get Selected Strike Prices
                                     strikes = await (async () => {
                                         let tbls = await dom.qAsync({ tag: "table" })
                                         await dom.wait(3000)
@@ -1097,18 +1100,22 @@ var app_stox = {
                                         }
                                         return out
                                     })()
+                                    
+                                    // Open each Selected Chart and append to main div, Format
                                     for (const strike of strikes) {
+                                        if(strike.isSpot) continue
                                         if (strike.index > 0) {
                                             menus.selectNifty50Charts.click()
                                             await dom.wait(3000)
                                         }
-                                        let isITM = strike.price < strikes.filter(s => s.isSpot)[0].price
+                                        let isITM = strike.price.numeric < strikes.filter(s => s.isSpot)[0].price.numeric
                                         /** @type {[HTMLTableElement, HTMLTableElement, HTMLTableElement]} */
                                         let [callsT, strikesT, putsT] = await dom.qAsync({ tag: "table" })
+                                        await dom.wait(5000)
                                         let strikeIdx = [...strikesT.rows].filter(row => {
-                                            console.log(row.childNodes[0]?.childNodes[0].textContent, strike.price.txt)
+                                            console.log(row.rowIndex, row.childNodes[0]?.childNodes[0].textContent, strike.price.txt)
                                             return row.childNodes[0]?.childNodes[0].textContent == strike.price.txt
-                                        })[0].rowIndex
+                                        })[0]?.rowIndex
                                         if (isITM) {
                                             let rR = [...putsT.rows].filter(row => row.rowIndex == strikeIdx)[0]
                                             let chrtOpnr = await dom.qAsync0({ dataid: "^=scripChart_NSE_FO" }, rR.cells[0].childNodes[0])
@@ -1117,8 +1124,38 @@ var app_stox = {
                                             let rR = [...callsT.rows].filter(row => row.rowIndex == strikeIdx)[0]
                                             let chrtOpnr = await dom.qAsync0({ dataid: "^=scripChart_NSE_FO" }, rR.cells[rR.cells.length - 1].childNodes[0])
                                             chrtOpnr.click()
-                                        }
+                                        }                                        
                                         await dom.wait(5000)
+                                        
+                                        // Append
+                                        /** @type {HTMLIFrameElement} */
+                                        let chrtIfrm = await dom.qAsync0({tag:"iframe"})
+                                        if(isITM){
+                                            app_stox.ui.components.optChartsPutsDiv.appendChild(chrtIfrm)
+                                        }else{
+                                            app_stox.ui.components.optChartsCallsDiv.appendChild(chrtIfrm)
+                                        }
+
+                                        // Format
+                                        // Format Option Chart
+                                        {
+                                            // let chrtDoc = chrtIfrm.contentDocument
+                                            // let removeChartHeader = await (async () => {
+                                            //     chrtIfrm.classList.add("nseChartFormat")
+                                            //     let noWrapper = await dom.qAsync0({ class: "^=noWrapWrapper-" }, chrtDoc)
+                                            //     noWrapper?.remove()
+                                            // })()
+
+                                            // let selectDateRangeTo1Day = await (async () => {
+                                            //     let dtRngBtn = (await dom.qAsync0({ class: "^=dateRangeWrapper" }, chrtDoc)).children[0].children[0]
+                                            //     dtRngBtn.click()
+                                            //     await dom.wait(500)
+                                            //     let mnu = await dom.qAsync0({ dataname: "menu-inner" }, chrtDoc)
+                                            //     let mnu1dy = mnu.children[mnu.children.length - 1]
+                                            //     mnu1dy.click()
+                                            // })()
+                                        }
+                                        await dom.wait(3000)
                                     }
                                 }
                             }
