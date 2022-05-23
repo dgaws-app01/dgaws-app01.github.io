@@ -46,6 +46,11 @@
     box-shadow: 0px 0px 8px 2px rgb(180 180 180);
 }
 
+#optionChartDiv{
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+}
+
 .appMenuItem {
     margin: 6px;
     padding: 6px;
