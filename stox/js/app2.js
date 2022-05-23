@@ -1065,22 +1065,61 @@ var app_stox = {
                             // Load Option Charts Menu
                             {
                                 menus.loadOptionCharts.onclick = async () => {
+                                    /** @type {[{isSpot : boolean, price : {numeric : number, txt : string}, index : number}]} */
                                     let strikes = []
+                                    let nifty50OrBankNifty = "Nifty50"
                                     strikes = await (async () => {
                                         let tbls = await dom.qAsync({ tag: "table" })
+                                        await dom.wait(3000)
                                         /** @type {HTMLTableElement} */
                                         let strikeTbl = tbls[1]
+                                        /** @type {[{isSpot : boolean, price : {numeric : number, txt : string}, index : number}]} */
+                                        let out = []
+
                                         /** @type {[HTMLTableRowElement]} */
                                         let rows = [...strikeTbl.rows]
                                         for (const row of rows) {
                                             if (row.rowIndex > 0) {
                                                 /** @type {HTMLInputElement} */
                                                 let inp = row.childNodes[0]?.childNodes[0]?.childNodes[1]
-
-                                                console.log(inp.checked)
+                                                let txt = row.childNodes[0]?.childNodes[0]?.childNodes[0]?.textContent
+                                                let isSpot = txt.includes("Spot")
+                                                let numeric = txt.replaceAll("Spot ", "").replaceAll(",", "") * 1
+                                                if (inp?.checked || isSpot) {
+                                                    out.push({ isSpot, price: { txt, numeric }, index: out.length })
+                                                    if (isSpot) {
+                                                        if (out[out.length - 1].price.numeric > 24000) {
+                                                            nifty50OrBankNifty = "NiftyBank"
+                                                        }
+                                                    }
+                                                }
                                             }
                                         }
+                                        return out
                                     })()
+                                    for (const strike of strikes) {
+                                        if (strike.index > 0) {
+                                            menus.selectNifty50Charts.click()
+                                            await dom.wait(3000)
+                                        }
+                                        let isITM = strike.price < strikes.filter(s => s.isSpot)[0].price
+                                        /** @type {[HTMLTableElement, HTMLTableElement, HTMLTableElement]} */
+                                        let [callsT, strikesT, putsT] = await dom.qAsync({ tag: "table" })
+                                        let strikeIdx = [...strikesT.rows].filter(row => {
+                                            console.log(row.childNodes[0]?.childNodes[0].textContent, strike.price.txt)
+                                            return row.childNodes[0]?.childNodes[0].textContent == strike.price.txt
+                                        })[0].rowIndex
+                                        if (isITM) {
+                                            let rR = [...putsT.rows].filter(row => row.rowIndex == strikeIdx)[0]
+                                            let chrtOpnr = await dom.qAsync0({ dataid: "^=scripChart_NSE_FO" }, rR.cells[0].childNodes[0])
+                                            chrtOpnr.click()
+                                        } else {
+                                            let rR = [...callsT.rows].filter(row => row.rowIndex == strikeIdx)[0]
+                                            let chrtOpnr = await dom.qAsync0({ dataid: "^=scripChart_NSE_FO" }, rR.cells[rR.cells.length - 1].childNodes[0])
+                                            chrtOpnr.click()
+                                        }
+                                        await dom.wait(5000)
+                                    }
                                 }
                             }
                         }
