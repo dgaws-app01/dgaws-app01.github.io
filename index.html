@@ -11,13 +11,15 @@
         let json = await ftch.json()
         return json
 
-        let setImage = async () => {
-            let imgData = await api("readImage")
-            let imgEle = document.getElementById("img1")
-            imgEle.src = imgData
-            window.setTimeout(() => setImage(), 20000)
-        }
+
     }
+    let setImage = async () => {
+        let imgData = await api("readImage")
+        let imgEle = document.getElementById("img1")
+        imgEle.src = imgData
+        window.setTimeout(() => setImage(), 20000)
+    }
+    await setImage()
 </script>
 
 <body>
