@@ -14,9 +14,9 @@
 
     }
     let setImage = async () => {
-        let imgData = await api("readImage", {})
+        let { imageData } = await api("readImage", {}) || {}
         let imgEle = document.getElementById("img1")
-        imgEle.src = imgData
+        imgEle.src = imageData
         window.setTimeout(() => setImage(), 20000)
     }
     setImage()
