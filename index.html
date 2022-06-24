@@ -1,10 +1,27 @@
 <html>
-  <body>
-    Entering Git hub
-    
-    Tableau ...
-    <iframe src="https://mytableau.mypepsico.com/#/views/AdhocDashboards-NewLayout-option2/DualComparisonTable"/>
-    
-    Exiting Github
-  </body>
+<script>
+    let api = async (action, params) => {
+        let endPoint = "https://script.google.com/macros/s/AKfycbyEf2aKN4jCEbd0xdS5I_3k05UDMM2xgtmXAC1N7JVWk4vapJ1vIBW7OH3WRLjOa5Q4-g/exec"
+        let options = {
+            body: JSON.stringify({ action, params }),
+            method: "POST",
+        }
+
+        let ftch = await fetch(endPoint, options)
+        let json = await ftch.json()
+        return json
+
+        let setImage = async () => {
+            let imgData = await api("readImage")
+            let imgEle = document.getElementById("img1")
+            imgEle.src = imgData
+            window.setTimeout(() => setImage(), 20000)
+        }
+    }
+</script>
+
+<body>
+    <img id="img1" style="width: 100vw; height: 60vh;" />
+</body>
+
 </html>
