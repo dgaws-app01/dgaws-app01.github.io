@@ -1,26 +1,37 @@
 <script>
     let version = "1.0.20230527"
 
-    class ComponentConfiguration {
+class ComponentConfiguration {
+    /** @type{} */
+    #propMap = new Map()
+}
+class ComponentDataHandler {
+    #data
+    
+    /** @type{Map<string, PropertyDescriptor | undefined} */
+    #props = new Map()
+
+    constructor() {
+
+    }
+
+    set data(v){
+        this.#data = v
+    }
+    assignPropMap(){
         
-        #propMap = new Map()
     }
-    class ComponentDataHandler {
-        #data
-        #props = new Map()
+}
+class ComponentUIHandler {
+    #shadowRoot
+    #me
 
-        constructor() {
+}
 
-        }
+export class ComponentMaker {
+    static get version() { return version }
+    static make() {
+        // 
     }
-    class ComponentUIHandler {
-
-    }
-
-    export class ComponentMaker {
-        static get version() { return version }
-        static make() {
-            // 
-        }
-    }
+}
 </script>

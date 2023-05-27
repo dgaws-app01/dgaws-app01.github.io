@@ -11,8 +11,14 @@ class ComponentDataHandler {
     constructor() {
 
     }
+
+    set data(v){
+        
+    }
 }
 class ComponentUIHandler {
+    #shadowRoot
+    #me
 
 }
 
