@@ -8,7 +8,9 @@ class ComponentConfiguration {
 class ComponentDataHandler {
     #data
     
-    /** @type{Map<string, PropertyDescriptor | undefined} */
+    /** @type {Map<string, string>} */
+    #dataBindings = new Map()
+    /** @type {Map<string, PropertyDescriptor | undefined} */
     #props = new Map()
 
     constructor() {
@@ -18,8 +20,21 @@ class ComponentDataHandler {
     set data(v){
         this.#data = v
     }
-    assignPropMap(){
-        
+    
+    /** 
+     * @param {}
+    */
+    bindDataToProp(bindings){
+
+    }
+    /** 
+     * @param {[string | {prop: string, descriptor: PropertyDescriptor}]} props
+     */
+    assignProps(props){
+        pmap.forEach(prop=> {
+            let propName = ""
+            let 
+        })
     }
 }
 class ComponentUIHandler {
