@@ -1,52 +1,56 @@
 <script>
     let version = "1.0.20230527"
 
-class ComponentConfiguration {
-    /** @type{} */
-    #propMap = new Map()
-}
-class ComponentDataHandler {
-    #data
-    
-    /** @type {Map<string, string>} */
-    #dataBindings = new Map()
-    /** @type {Map<string, PropertyDescriptor | undefined} */
-    #props = new Map()
+    class ComponentConfiguration {
+        /** @type{} */
+        #propMap = new Map()
+    }
+    class ComponentDataHandler {
+        #data
 
-    constructor() {
+        /** @type {Map<string, string>} */
+        #dataBindings = new Map()
+        /** @type {Map<string, PropertyDescriptor | undefined} */
+        #props = new Map()
+
+        constructor() {
+
+        }
+
+        set data(v) {
+            this.#data = v
+        }
+
+        /** 
+         *  @param {} items - {$prop1 : undefined, $prop2: {get(){}, set(v){}}} 
+         * */
+        addProps(items){}
+        /** 
+         * @param {{readonly: boolean}} options
+         * @description listProps({readonly:false})
+         * @returns {[string]}
+        */
+        listProps(options){}
+        /** 
+         * @desc {$prop1 : "data1.data2.leaf1", $prop2 : "data1.data2.leaf2"}
+         * @param {any} bindings - 
+        */
+        addBindings(bindings) {
+
+        }
+        
+        
+    }
+    class ComponentUIHandler {
+        #shadowRoot
+        #me
 
     }
 
-    set data(v){
-        this.#data = v
+    export class ComponentMaker {
+        static get version() { return version }
+        static make() {
+            // 
+        }
     }
-    
-    /** 
-     * @param {}
-    */
-    bindDataToProp(bindings){
-
-    }
-    /** 
-     * @param {[string | {prop: string, descriptor: PropertyDescriptor}]} props
-     */
-    assignProps(props){
-        pmap.forEach(prop=> {
-            let propName = ""
-            let 
-        })
-    }
-}
-class ComponentUIHandler {
-    #shadowRoot
-    #me
-
-}
-
-export class ComponentMaker {
-    static get version() { return version }
-    static make() {
-        // 
-    }
-}
 </script>

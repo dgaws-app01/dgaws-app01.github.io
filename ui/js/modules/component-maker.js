@@ -3,15 +3,21 @@ let version = "1.0.20230527"
 class ComponentConfiguration {
     /** @type{} */
     #propMap = new Map()
+
 }
 class ComponentDataHandler {
     #data
     #props = new Map()
 
     constructor() {
-
+        let arr = []
+        
     }
 
+    /** 
+     * @description
+     * @ret
+     */
     set data(v){
         
     }
