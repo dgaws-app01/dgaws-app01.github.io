@@ -1,4 +1,4 @@
-import  ComponentMaker  from "./modules/component-maker.js";
+import { ComponentMaker } from "./modules/component-maker.js";
 
 const componentMaker = new ComponentMaker();
-alert(com)
+alert(componentMaker.version)
