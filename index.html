@@ -15,7 +15,9 @@
       for (let si = 0; si < scriptsList.length; si++) {
         let script = await fetch(scriptsList[si])
         let scriptContent = await script.text()
-        document.head.append(scriptContent)
+        let domParser = new DOMParser()
+        let scriptDom = domParser.parseFromString(scriptContent)
+        document.head.append(scriptDom)
         //console.log(scriptContent)
       }
     }
