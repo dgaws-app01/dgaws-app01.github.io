@@ -1,4 +1,5 @@
-<script>
+<script aria-label="component-maker-js.html">
+
     let version = "1.0.20230527"
 
     class ComponentConfiguration {
@@ -6,7 +7,7 @@
         #propMap = new Map()
     }
     class ComponentDataHandler {
-
+        
 
 
 
@@ -16,15 +17,13 @@
         #me
 
     }
-
-    export class ComponentMaker {
+    class ComponentMaker {
         static get version() { return version }
         static make() {
 
             let lcc = class extends HTMLElement {
                 #dataHandler = {
                     data: {},
-
                     /** @type {Map<string, PropertyDescriptor | undefined} */
                     props: new Map(),
                     /** @type {Map<string, [string]>} */
@@ -66,4 +65,5 @@
             }
         }
     }
+
 </script>

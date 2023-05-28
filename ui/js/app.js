@@ -1,4 +1,4 @@
 import { ComponentMaker } from "./modules/component-maker.js";
 
-
-alert(ComponentMaker.version)
+let a = new Map()
+console.log(ComponentMaker.version)
