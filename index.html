@@ -15,8 +15,8 @@
       for (let si = 0; si < scriptsList.length; si++) {
         let script = await fetch(scriptsList[si])
         let scriptContent = await script.text()
- 
-        console.log(scriptContent)
+        document.head.append(scriptContent)
+        //console.log(scriptContent)
       }
     }
 
