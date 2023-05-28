@@ -12,8 +12,7 @@
           let script = await fetch(scriptsList[si])
         let scriptContent = await script.text()
         let domParser = new DOMParser()
-        let scriptDom = domParser.parseFromString(scriptContent, "text/html")
-        console.log(scriptDom)
+        let scriptDom = domParser.parseFromString(scriptContent, "text/html")        
 
         let script2BeIneserted = scriptDom.head.querySelector("script")
         let scriptContent2BeInserted = script2BeIneserted.textContent //.replaceAll("<br>", "")
@@ -38,7 +37,7 @@
   <script>
 
   </script>
-  <script src="./ui/js/app.js" defer type="module"></script>
+  <!-- <script src="./ui/js/app.js" defer type="module"></script> -->
 </head>
 
 <body>
