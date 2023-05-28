@@ -7,7 +7,8 @@
     async function loadScripts() {
       let scriptsList = ["ui/js/modules/component-maker-js.html", "ui/js/app-js.html"]
       for (let si = 0; si < scriptsList.length; si++) {
-        let script = await fetch(scriptsList[si])
+        try{
+          let script = await fetch(scriptsList[si])
         let scriptContent = await script.text()
         let domParser = new DOMParser()
         let scriptDom = domParser.parseFromString(scriptContent, "text/html")
@@ -20,7 +21,12 @@
         newScriptNode.textContent = scriptContent2BeInserted
         newScriptNode.setAttribute("aria-label", scriptLabel)
         document.head.appendChild(newScriptNode)
-        console.log(scriptContent2BeInserted)
+        }
+        catch(err){
+
+        }
+        
+        
       }
     }
 
