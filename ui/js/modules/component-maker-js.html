@@ -51,8 +51,8 @@
                 /** @param {{derived:boolean}} options */
                 listProps(options) {
                     let { derived } = options
-                    if (derived) return [...new Set([...this.#derivedProps.values()].flatMap(f => f))]
-                    return [...this.#props.keys()]
+                    if (derived) return [...new Set([...this.#dataHandler.derivedProps.values()].flatMap(f => f))]
+                    return [...this.#dataHandler.props.keys()]
                 }
                 /** 
                  * @desc {$prop1 : "data1.data2.leaf1", $prop2 : "data1.data2.leaf2"}
