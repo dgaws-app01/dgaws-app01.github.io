@@ -13,7 +13,7 @@
     async function loadScripts() {
       let scriptsList = ["ui/js/modules/component-maker-js.html", "ui/js/app-js.html"]
       for (let si = 0; si < scriptsList.length; si++) {
-        let script = await fetch(scriptsList[i])
+        let script = await fetch(scriptsList[si])
         let scriptContent = await script.text()
  
         console.scriptContent
