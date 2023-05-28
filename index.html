@@ -14,7 +14,7 @@
         console.log(scriptDom)
 
         let script2BeIneserted = scriptDom.head.querySelector("script")
-        let scriptContent2BeInserted = script2BeIneserted.innerText
+        let scriptContent2BeInserted = script2BeIneserted.innerText.replaceAll("<br>", "")
         let scriptLabel = script2BeIneserted.getAttribute("aria-label")
         let newScriptNode = document.createElement("script")
         newScriptNode.innerText = scriptContent2BeInserted
