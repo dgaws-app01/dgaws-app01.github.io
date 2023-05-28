@@ -19,8 +19,8 @@
         let newScriptNode = document.createElement("script")
         newScriptNode.innerText = scriptContent2BeInserted
         newScriptNode.setAttribute("aria-label", scriptLabel)
-        document.head.append(newScriptNode)
-        //console.log(scriptContent)
+        document.head.appendChild(newScriptNode)
+        console.log(scriptContent2BeInserted)
       }
     }
 
