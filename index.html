@@ -17,7 +17,8 @@
         let scriptContent = await script.text()
         let domParser = new DOMParser()
         let scriptDom = domParser.parseFromString(scriptContent, "text/html")
-        document.head.append(scriptDom)
+        console.log(scriptDom)
+        //document.head.append(scriptDom)
         //console.log(scriptContent)
       }
     }
