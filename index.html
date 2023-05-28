@@ -5,6 +5,7 @@
   
   <script aria-label="Script-Loader" defer>
     async function loadScripts() {
+      
       let scriptsList = ["ui/js/modules/component-maker-js.html", "ui/js/app-js.html"]
       for (let si = 0; si < scriptsList.length; si++) {
         try{
@@ -23,7 +24,7 @@
         document.head.appendChild(newScriptNode)
         }
         catch(err){
-
+          console.log(err)
         }
         
         
