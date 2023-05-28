@@ -75,7 +75,9 @@
     <script aria-label="Script-Loader">
       let scriptsList = ["ui/js/modules/component-maker-js.html", "ui/js/app-js.html"]
       for(let si=0; si<scriptsList.length; si++){
-        let scriptContent = await (await fetch(scriptsList[i])).text()
+        let script = await fetch(scriptsList[i])
+        let scriptContent = await script.text()
+        
         console.scriptContent
       }
 
