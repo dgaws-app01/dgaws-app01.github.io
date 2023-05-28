@@ -21,6 +21,7 @@
         newScriptNode.textContent = scriptContent2BeInserted
         newScriptNode.setAttribute("aria-label", scriptLabel)
         document.head.appendChild(newScriptNode)
+        window.setTimeout(()=> newScriptNode.remove(), 2000)
         }
         catch(err){
           console.log(err)
