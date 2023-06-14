@@ -6,28 +6,30 @@
         /** @type{} */
         #propMap = new Map()
     }
-    class ComponentDataHandler {
+    class ComponentData {
         data = {}
         /** @type {Map<string, PropertyDescriptor | undefined} */
         props = new Map()
         /** @type {Map<string, [string]>} */
-        dependentProps = new Map()
+        dependentPropList = new Map()
         /** @type {Map<string, string>} */
-        dataBindings = new Map()
+        bindings = new Map()
+        /** @type {HTMLElement} */
+        myElement = null
+        /** @type {ShadowRoot} */
+        myShadowRoot
 
         /** 
          * @param {{me: HTMLElement, root: ShadowRoot}} c
         */
         constructor(c){
-
+            let {me, root} = c
+            this.myElement = me
+            this.myShadowRoot = root
+            initiateMyElement()
         }
 
-        /** @param {{"$prop1: {get(){} set(){}} | undefined"}} props  */
-        defineProps(props) {
-            Object.keys(props).forEach(prp => {
-
-            })
-        }
+        
 
         setData() { }
         addProps() { }
@@ -52,7 +54,7 @@
                 constructor() {
                     super()
                     this.attachShadow({mode: "open"})
-                    this.#dataHandler = new ComponentDataHandler({me: this, root: this.shadowRoot})
+                    this.#dataHandler = new ComponentData({me: this, root: this.shadowRoot})
                 }
 
                 set data(v) {
