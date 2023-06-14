@@ -14,22 +14,35 @@
         dependentPropList = new Map()
         /** @type {Map<string, string>} */
         bindings = new Map()
+       
         /** @type {HTMLElement} */
         myElement = null
         /** @type {ShadowRoot} */
         myShadowRoot
 
         /** 
-         * @param {{me: HTMLElement, root: ShadowRoot}} c
+         * @param {{ele: HTMLElement, root: ShadowRoot}} c
         */
         constructor(c){
-            let {me, root} = c
-            this.myElement = me
+            let {ele, root} = c
+            this.myElement = ele
             this.myShadowRoot = root
+            
             initiateMyElement()
         }
 
-        
+        initiateMyElement(){
+            /** @type {ComponentData} */
+            let me = this
+
+            Object.defineProperty(this.myElement, "data", {
+                configurable: true, enumerable: true, 
+                get(){ return me.data },
+                set(v){ me.data = v }
+            })
+
+            
+        }
 
         setData() { }
         addProps() { }
