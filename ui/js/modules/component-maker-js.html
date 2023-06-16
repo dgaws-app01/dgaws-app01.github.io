@@ -2,11 +2,11 @@
 
     let version = "1.0.20230527"
 
-    class ComponentConfiguration {
+    class CConfig {
         /** @type{} */
         #propMap = new Map()
     }
-    class ComponentData {
+    class CData {
         data = {}
         /** @type {Map<string, PropertyDescriptor | undefined} */
         props = new Map()
@@ -32,7 +32,7 @@
         }
 
         initiateMyElement(){
-            /** @type {ComponentData} */
+            /** @type {CData} */
             let me = this
 
             Object.defineProperty(this.myElement, "data", {
@@ -43,35 +43,37 @@
 
             
         }
-
-        setData() { }
+        
         addProps() { }
 
 
 
     }
-    class ComponentUIHandler {
+    class CUI {
         #shadowRoot
         #me
 
 
     }
-    class ComponentMaker {
+    class CMaker {
         static get version() { return version }
-        static make() {
+        static async make() {
+
+            let uiHtml, uiScript, uiData, uiAttrs, uiEvts;
+
 
             let lcc = class extends HTMLElement {
-                #dataHandler
+                #cdata
 
 
                 constructor() {
                     super()
                     this.attachShadow({mode: "open"})
-                    this.#dataHandler = new ComponentData({me: this, root: this.shadowRoot})
+                    this.#cdata = new CData({me: this, root: this.shadowRoot})
                 }
 
                 set data(v) {
-                    this.#dataHandler.data = v
+                    this.#cdata.data = v
                 }
                 //get props() { return this.#props }
 
@@ -79,8 +81,8 @@
                 /** @param {{derived:boolean}} options */
                 listProps(options) {
                     let { derived } = options
-                    if (derived) return [...new Set([...this.#dataHandler.derivedProps.values()].flatMap(f => f))]
-                    return [...this.#dataHandler.props.keys()]
+                    if (derived) return [...new Set([...this.#cdata.derivedProps.values()].flatMap(f => f))]
+                    return [...this.#cdata.props.keys()]
                 }
                 /** 
                  * @desc {$prop1 : "data1.data2.leaf1", $prop2 : "data1.data2.leaf2"}
@@ -91,6 +93,8 @@
                 }
 
             }
+
+            return lcc
         }
     }
 

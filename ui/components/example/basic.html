@@ -9,9 +9,21 @@
             background-color: rgb(240,240,240);
         }
     </style>
+    <script>        
+        me.prop("$prop1", "$.lion")        
+        me.prop("$prop2", {get(){return $.id+2}, set(v){$.id = v-2}})
+        
+        me.evt("$$evt1", me.$_done.onclick)
+        me.$_field1.onchange = (e)=> {
+            
+        }
+        
+    </script>
     <container>
-        <div>
-            Test Div 
+        <div #master>
+            <input type="text" #field1>
+            <input type="text" #field2>
+            <button value="${me.prop1}" #done></button>
         </div>
     </container>
 </ui-basic>
