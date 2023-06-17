@@ -10,10 +10,14 @@
         }
     </style>
     <script>        
-        me.prop("$prop1", "$.lion")        
-        me.prop("$prop2", {get(){return $.id+2}, set(v){$.id = v-2}})
+        $prop("$prop1")        
+        $prop("$prop2", {get(){return $.id+2}, set(v){$.id = v-2}})
+        $props(["$prop3", "$prop4"])
+
+        $evt("$$evt1", me.$_done.onclick)
+        $evts(["$$evt2", "$$evt3"])
         
-        me.evt("$$evt1", me.$_done.onclick)
+        
         me.$_field1.onchange = (e)=> {
             
         }
