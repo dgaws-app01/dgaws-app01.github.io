@@ -1,7 +1,15 @@
 <script aria-label="app-js.html" type="module">
     //import { CMaker } from "./modules/component-maker.js";
 
+    async function showAppVersion(){
+        let api = "https://api.github.com/repos/dgaws-app01/dgaws-app01.github.io/commits"
+        let commitsQ = await fetch(api)
+        let commitJ = commitsQ.json()
+        console.log(commitJ)
+
+    }
+
     let a = new Map()
-    CMaker.make("new ui")
+    showAppVersion()
     console.log(CMaker.version)
 </script>
