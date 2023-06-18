@@ -1,6 +1,6 @@
 <script aria-label="component-maker-js.html">
 
-    let version = "1.0.20230527"
+    let version = "1.0.20230618"
 
     class CConfig {
         /** @type{} */
@@ -57,8 +57,9 @@
     }
     class CMaker {
         static get version() { return version }
-        static async make() {
+        static async make(uiPth) {
 
+            alert("in CMaker")
             let uiHtml, uiScript, uiData, uiAttrs, uiEvts;
 
 
