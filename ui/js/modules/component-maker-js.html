@@ -61,12 +61,15 @@
             const uiGlblPth = "ui/components"
             
             try {
-                let uiFullPth, uiHtml, uiScript, uiData, uiAttrs, uiEvts, uiEle;
+                let uiFullPth, uiHtml, uiScript, uiData, uiAttrs, uiEvts, uiEle, htmlParser;
                 uiFullPth = `${uiGlblPth}/${uiPth}.html`
                 uiHtml = await fetch(uiFullPth)
                 uiHtml = await uiHtml.text()
-                uiEle = document.createElement("div")
-                uiEle.innerHTML = uiHtml
+
+                htmlParser = new DOMParser()
+                uiEle = htmlParser.parseFromString(uiHtml, "text/html").body
+                //uiEle = document.createElement("div")
+                //uiEle.innerHTML = uiHtml
                 
                 uiScript = uiEle.querySelector("script").textContent + ""
                 uiEle.querySelector("script").remove()
@@ -82,6 +85,9 @@
                         super()
                         this.attachShadow({ mode: "open" })
                         this.#cdata = new CData({ me: this, root: this.shadowRoot })
+
+                        
+
                     }
 
                     set data(v) {
