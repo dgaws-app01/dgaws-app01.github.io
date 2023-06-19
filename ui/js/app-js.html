@@ -5,6 +5,7 @@
         let api = "https://api.github.com/repos/dgaws-app01/dgaws-app01.github.io/commits"
         let commitsQ = await fetch(api)
         let commitJ = await commitsQ.json()
+        let commitComment = ""
         console.log({committedOn : new Date(commitJ[0]?.commit?.author?.date).toLocaleString()})
         console.log(commitJ)
 
