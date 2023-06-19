@@ -1,14 +1,29 @@
 <script aria-label="app-js.html" type="module">
     //import { CMaker } from "./modules/component-maker.js";
 
+    let warningId = null
     async function showLastCommittedAt(){
         let api = "https://api.github.com/repos/dgaws-app01/dgaws-app01.github.io/commits"
         let commitsQ = await fetch(api)
         let commitJ = await commitsQ.json()
         
-        let commitTime = "2023-06-19T13:44:10.741Z"
+        let commitTime = "2023-06-19T13:53:27.626Z"
         
-        console.log({isLatestVersion : commitJ[0]?.commit?.message == commitTime})
+        if(commitJ[0]?.commit?.message != commitTime){
+            console.log("Please wait for the latest version ! ")
+            if(!warningId)
+                warningId = window.setInterval(showLastCommittedAt, 10000)
+        }
+        else {
+            console.log({isLatestVersion : commitJ[0]?.commit?.message == commitTime})
+            window.clearInterval(warningId)
+            warningId = null
+        }
+        
+
+        // SET COMMENT TO 
+        // new Date().toJSON()
+        
         
 
     }
