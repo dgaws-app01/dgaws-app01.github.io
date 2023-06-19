@@ -67,7 +67,11 @@
                 uiHtml = await uiHtml.text()
                 uiEle = document.createElement("div")
                 uiEle.innerHTML = uiHtml
-                console.log(uiEle.children)
+                
+                uiScript = uiEle.querySelector("script").textContent + ""
+                uiEle.querySelector("script").remove()
+
+                console.log({uiScript, uiEle})
 
 
                 let lcc = class extends HTMLElement {
