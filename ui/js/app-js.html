@@ -7,7 +7,7 @@
         let commitsQ = await fetch(api)
         let commitJ = await commitsQ.json()
         
-        let commitTime = "2023-06-19T14:00:13.047Z"
+        let commitTime = "2023-06-19T14:25:24.590Z"
         
         if(commitJ[0]?.commit?.message != commitTime){
             console.log(`${new Date().getTime()} - Please wait for the latest version ! `)
