@@ -6,14 +6,16 @@
         let commitsQ = await fetch(api)
         let commitJ = await commitsQ.json()
         
-        let commitTime = "2023-06-19T13:35:46.808Z"
+        let commitTime = "2023-06-19T13:44:10.741Z"
         
         console.log({isLatestVersion : commitJ[0]?.commit?.message == commitTime})
         
 
     }
 
-    await CMaker.make("example/basic")
+    CMaker.make("example/basic")
+        .then(d=> console.log(d))
+        .catch(e=> console.log(e))
 
     let a = new Map()
     showLastCommittedAt()
