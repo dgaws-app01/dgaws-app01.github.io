@@ -5,12 +5,15 @@
         let api = "https://api.github.com/repos/dgaws-app01/dgaws-app01.github.io/commits"
         let commitsQ = await fetch(api)
         let commitJ = await commitsQ.json()
-        let commitTime = "2023-06-19T12:57:38.316Z"
-        //console.log({committedOn : new Date(commitJ[0]?.commit?.author?.date).toLocaleString()})
+        
+        let commitTime = "2023-06-19T13:35:07.290Z"
+        
         console.log({isLatestVersion : commitJ[0]?.commit?.message == commitTime})
-        //console.log("a",commitJ)
+        
 
     }
+
+    CMaker.make("example/basic")
 
     let a = new Map()
     showLastCommittedAt()

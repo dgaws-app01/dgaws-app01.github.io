@@ -58,11 +58,14 @@
     class CMaker {
         static get version() { return version }
         static async make(uiPth) {
-
+            const uiGlblPth = "ui/components"
             console.log(uiPth)
             try {
-                let uiHtml, uiScript, uiData, uiAttrs, uiEvts;
-
+                let uiFullPth, uiHtml, uiScript, uiData, uiAttrs, uiEvts;
+                uiFullPth = `${uiGlblPth}/${uiPth}.html`
+                uiHtml = await fetch(uiFullPth)
+                uiHtml = await uiHtml.text()
+                console.log(uiHtml)
 
                 let lcc = class extends HTMLElement {
                     #cdata
