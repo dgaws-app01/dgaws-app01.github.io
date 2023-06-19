@@ -6,7 +6,7 @@
         let commitsQ = await fetch(api)
         let commitJ = await commitsQ.json()
         console.log({committedOn : new Date(commitJ[0]?.commit?.author?.date).toLocaleString()})
-        console.log("")
+        console.log(commitJ)
 
     }
 
