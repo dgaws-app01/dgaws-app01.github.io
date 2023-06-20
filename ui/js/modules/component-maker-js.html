@@ -44,7 +44,19 @@
 
         }
 
-        addProps() { }
+        /**
+         * @param {[string | {string: PropertyDescriptor}]} props
+         */
+        addProps(props) {
+            for (let prop of props) {
+                let prpDsc = 
+                if (typeof (prop) == "string") {
+
+                } else {
+
+                }
+            }
+        }
 
 
 
@@ -59,7 +71,7 @@
         static get version() { return version }
         static async make(uiPth) {
             const uiGlblPth = "ui/components"
-            
+
             try {
                 let uiFullPth, uiHtml, uiScript, uiData, uiAttrs, uiEvts, uiEle, htmlParser;
                 uiFullPth = `${uiGlblPth}/${uiPth}.html`
@@ -70,7 +82,7 @@
                 uiEle = htmlParser.parseFromString(uiHtml, "text/html").body
                 //uiEle = document.createElement("div")
                 //uiEle.innerHTML = uiHtml
-                
+
                 uiScript = `
                 let scrpt = (params) => {
                     let {me, root} = params
@@ -81,27 +93,28 @@
                 `
                 uiEle.querySelector("script").remove()
 
-                console.log({uiScript, uiEle})
+                console.log({ uiScript, uiEle })
 
 
                 let lcc = class extends HTMLElement {
                     #cdata
 
 
+
                     constructor() {
                         super()
                         this.attachShadow({ mode: "open" })
                         let prm = { me: this, root: this.shadowRoot }
-                        this.#cdata = new CData(prm)
-                        
+                        this.#cdata = {}//new CData(prm)
+
                         let func = Function(uiScript)()
                         func(prm)
-                        
+
 
                     }
 
                     set data(v) {
-                        this.#cdata.data = v
+                        this.#cdata = v
                     }
                     //get props() { return this.#props }
 
@@ -112,6 +125,25 @@
                         if (derived) return [...new Set([...this.#cdata.derivedProps.values()].flatMap(f => f))]
                         return [...this.#cdata.props.keys()]
                     }
+                    /**
+                    * @param {[string | {string: PropertyDescriptor}]} props
+                    */
+                    addProps(props) {
+                        for (let prop of props) {
+                            let propVal = null
+                            /** @type {PropertyDescriptor} */
+                            let prpDsc = {
+                                configurable: true,
+                                enumerable: true,
+
+                            }
+                            if (typeof (prop) == "string") {
+
+                            } else {
+
+                            }
+                        }
+                    }
                     /** 
                      * @desc {$prop1 : "data1.data2.leaf1", $prop2 : "data1.data2.leaf2"}
                      * @param {any} bindings - 
@@ -119,6 +151,7 @@
                     updateBindings(bindings) {
 
                     }
+
 
                 }
 
@@ -133,5 +166,48 @@
 
         }
     }
+
+
+    class DataObserver {
+        #json
+        #xml
+        #tree
+
+        set json(v) { this.#json = v }
+        get json() { return this.#json }
+
+        xmlize() {
+            let parser1 = new DOMParser()
+            let xdoc = parser1.parseFromString("<data></data>", "text/xml")
+            xdoc = xdoc.children[0]
+            console.log(xdoc)
+        }
+    }
+
+
+
+    // TESTING ...
+
+    let observer1 = new DataObserver()
+    let data = {
+        portName: "ddj",
+        addr: "dum dum",
+        codes: ["DDU", "CCU"],
+        gates: [
+            {
+                no: 1,
+                direction: "north",
+                airlines: [
+                    { name: "indigo", times: 2000 },
+                    { name: "air india", times: 0800 },
+                ]
+            },
+            {
+                no: 2,
+                direction: "south"
+            }
+        ]
+    }
+    observer1.json = data
 
 </script>
