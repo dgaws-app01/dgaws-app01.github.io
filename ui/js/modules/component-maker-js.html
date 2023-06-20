@@ -28,7 +28,7 @@
             this.myElement = ele
             this.myShadowRoot = root
 
-            initiateMyElement()
+            this.initiateMyElement()
         }
 
         initiateMyElement() {
@@ -91,10 +91,11 @@
                     constructor() {
                         super()
                         this.attachShadow({ mode: "open" })
-                        this.#cdata = new CData({ me: this, root: this.shadowRoot })
+                        let prm = { me: this, root: this.shadowRoot }
+                        this.#cdata = new CData(prm)
                         
                         let func = Function(uiScript)
-                        func({me:this, root: this.shadowRoot})
+                        func(prm)
                         
 
                     }
