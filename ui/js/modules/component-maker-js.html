@@ -24,8 +24,8 @@
          * @param {{ele: HTMLElement, root: ShadowRoot}} c
         */
         constructor(c) {
-            let { ele, root } = c
-            this.myElement = ele
+            let { me, root } = c
+            this.myElement = me
             this.myShadowRoot = root
 
             this.initiateMyElement()
@@ -33,12 +33,12 @@
 
         initiateMyElement() {
             /** @type {CData} */
-            let me = this
+            let me2 = this
 
             Object.defineProperty(this.myElement, "data", {
                 configurable: true, enumerable: true,
-                get() { return me.data },
-                set(v) { me.data = v }
+                get() { return me2.data },
+                set(v) { me2.data = v }
             })
 
 
