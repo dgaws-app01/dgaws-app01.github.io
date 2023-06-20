@@ -168,46 +168,61 @@
     }
 
 
-    class DataObserver {
-        #json
-        #xml
-        #tree
+    class DataObserver{
+    #json
+    #xml
+    #tree
+    #observer
 
-        set json(v) { this.#json = v }
-        get json() { return this.#json }
-
-        xmlize() {
-            let parser1 = new DOMParser()
-            let xdoc = parser1.parseFromString("<data></data>", "text/xml")
-            xdoc = xdoc.children[0]
-            console.log(xdoc)
-        }
+    createXml(){
+        let parser1 = new DOMParser()
+        let xdoc = parser1.parseFromString("<root></root>", "text/xml")
+    	this.#xml = xdoc.children[0]
     }
 
-
-
-    // TESTING ...
-
-    let observer1 = new DataObserver()
-    let data = {
-        portName: "ddj",
-        addr: "dum dum",
-        codes: ["DDU", "CCU"],
-        gates: [
-            {
-                no: 1,
-                direction: "north",
-                airlines: [
-                    { name: "indigo", times: 2000 },
-                    { name: "air india", times: 0800 },
-                ]
-            },
-            {
-                no: 2,
-                direction: "south"
-            }
-        ]
+    constructor(){
+        this.createXml()
+        this.createObserver()
     }
-    observer1.json = data
+
+    set json(v){ this.#json = v } 
+    get json(){ return this.#json }
+
+    //set xml(v){ this.#json = v } 
+    get xml(){ return this.#xml }
+
+    createObserver(){
+        this.#observer = new MutationObserver((mutationList, observer) => {
+            console.log({mutationList, observer})
+        })
+        this.#observer.observe(this.#xml, { attributes: true, childList: true, subtree: true, attributeOldValue: true })
+    }
+}
+
+
+
+// TESTING ...
+
+let observer1 = new DataObserver()
+let data = {
+    portName : "ddj", 
+    addr : "dum dum", 
+    codes : ["DDU", "CCU"], 
+    gates : [
+        {
+		no:1, 
+		direction:"north", 
+		airlines : [
+				{name: "indigo", times: 2000},
+				{name: "air india", times: 0800},
+			]
+	}, 
+        {
+		no:2, 
+		direction:"south"
+	}
+    ]
+}
+observer1.json = data
 
 </script>
