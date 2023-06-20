@@ -94,7 +94,7 @@
                         let prm = { me: this, root: this.shadowRoot }
                         this.#cdata = new CData(prm)
                         
-                        let func = Function(uiScript)
+                        let func = Function(uiScript)()
                         func(prm)
                         
 
