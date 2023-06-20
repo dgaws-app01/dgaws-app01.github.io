@@ -71,7 +71,14 @@
                 //uiEle = document.createElement("div")
                 //uiEle.innerHTML = uiHtml
                 
-                uiScript = uiEle.querySelector("script").textContent + ""
+                uiScript = `
+                let scrpt = (params) => {
+                    let {me, root} = params
+                    ${uiEle.querySelector("script").textContent}
+                }
+
+                return scrpt
+                `
                 uiEle.querySelector("script").remove()
 
                 console.log({uiScript, uiEle})
@@ -85,7 +92,9 @@
                         super()
                         this.attachShadow({ mode: "open" })
                         this.#cdata = new CData({ me: this, root: this.shadowRoot })
-
+                        
+                        let func = Function(uiScript)
+                        func({me:this, root: this.shadowRoot})
                         
 
                     }
@@ -112,11 +121,14 @@
 
                 }
 
+                customElements.define("c-test-1", lcc)
                 return lcc
             }
             catch (err) {
                 console.log(err)
             }
+
+
 
         }
     }
