@@ -176,7 +176,7 @@
 
         createXml() {
             let parser1 = new DOMParser()
-            let xdoc = parser1.parseFromString("<root></root>", "text/xml")
+            let xdoc = parser1.parseFromString("<data></data>", "text/xml")
             return xdoc.children[0]
         }
 
@@ -194,31 +194,51 @@
         createObserver() {
             this.#observer = new MutationObserver((mutationList, observer) => {
                 console.log({ mutationList, observer })
+
             })
             this.#observer.observe(this.#xml, { attributes: true, childList: true, subtree: true, attributeOldValue: true })
         }
 
-        json2xml(j, x){    
-            if(!x) x = this.#xml
+        json2xml(j, x) {
+            if (!x) x = this.#xml
             let j2x = (j, x, v) => {
-                for(let ji in j){
+                for (let ji in j) {
                     let jiv = j[ji]
-                    
-                    let ne = document.createElement(`${isNaN(ji) ? ji : "_" + ji + "_" }`)
-                    x.append(ne)   
-                    if(typeof(jiv) == "object") {
-                        //ne.append(  )                        
+
+                    let ne = document.createElement(`${isNaN(ji) ? ji : "_" + ji + "_"}`)
+                    x.append(ne)
+                    if (typeof (jiv) == "object") {
                         j2x(jiv, ne)
                     }
                     else {
-                        //let ne = document.createElement(`${ji}`)
-                        ne.append(jiv)                        
+                        ne.append(jiv)
                     }
-                    
+
                 }
             }
             j2x(j, x)
         }
+
+        xml2json(x) {
+            let jj = {}
+            if (!x) x = this.#xml
+            let x2j = (x, j) => {
+                let kids = [...x.children]
+                for (let kid in kids) {
+                    if (kid.children.length == 0) {
+                        j[kid.nodeName] = kid.textContent
+                    }
+                    else {
+                        let j2 = {}
+                        j[x.nodeName] = j2
+                        x2j(kid, j2)
+                    }
+                }
+            }
+            x2j(x)
+            return jj
+        }
+
     }
 
 
@@ -246,6 +266,7 @@
     }
     observer1.json = data
     let x = observer1.xml
+    observer1.json2xml(data)
     x
 
 </script>
