@@ -200,15 +200,22 @@
 
         json2xml(j, x){    
             if(!x) x = this.#xml
-            let j2x = (j, x) => {
-                for(let ji of j){
-                    console.log(ji)
+            let j2x = (j, x, v) => {
+                for(let ji in j){
+                    let jiv = j[ji]
+                    if(typeof(jiv) == "object")
+                        console.log("obj") // recurse
+                    else {
+                        let ne = document.createElement(`${ji}`)
+                        ne.append(jiv)
+                        x.append(ne)
+                    }
+                        
                 }
             }
-            j2x(j)
+            j2x(j, x)
         }
     }
-
 
 
     // TESTING ...
