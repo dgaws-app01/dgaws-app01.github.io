@@ -203,14 +203,17 @@
             let j2x = (j, x, v) => {
                 for(let ji in j){
                     let jiv = j[ji]
-                    if(typeof(jiv) == "object")
-                        console.log("obj") // recurse
-                    else {
-                        let ne = document.createElement(`${ji}`)
-                        ne.append(jiv)
-                        x.append(ne)
+                    let ne = document.createElement(`${ji}`)
+                    x.append(ne)   
+                    if(typeof(jiv) == "object") {
+                        //ne.append(  )                        
+                        j2x(jiv, ne)
                     }
-                        
+                    else {
+                        //let ne = document.createElement(`${ji}`)
+                        ne.append(jiv)                        
+                    }
+                    
                 }
             }
             j2x(j, x)
