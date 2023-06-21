@@ -223,15 +223,19 @@
             let jj = {}
             if (!x) x = this.#xml
             let x2j = (x, j) => {
-                let kids = [...x.children]
-                for (let kid in kids) {
-                    if (kid.children.length == 0) {
-                        j[kid.nodeName] = kid.textContent
-                    }
-                    else {
+                let kids = x.children
+
+                for (let kidI in kids) {
+                    let kid = kids[kidI]
+                    console.log(kid.children)
+                    if (kid.children?.length > 0) {
                         let j2 = {}
                         j[x.nodeName] = j2
-                        x2j(kid, j2)
+                        x2j(kid.children, j2)
+
+                    }
+                    else {
+                        j[kid.nodeName] = kid.textContent
                     }
                 }
             }
