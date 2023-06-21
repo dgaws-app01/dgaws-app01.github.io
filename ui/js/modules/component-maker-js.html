@@ -197,6 +197,16 @@
             })
             this.#observer.observe(this.#xml, { attributes: true, childList: true, subtree: true, attributeOldValue: true })
         }
+
+        json2xml(j, x){    
+            if(!x) x = this.#xml
+            let j2x = (j, x) => {
+                for(let ji of j){
+                    console.log(ji)
+                }
+            }
+            j2x(j)
+        }
     }
 
 
