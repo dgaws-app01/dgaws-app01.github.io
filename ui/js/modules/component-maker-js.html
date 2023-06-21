@@ -203,7 +203,8 @@
             let j2x = (j, x, v) => {
                 for(let ji in j){
                     let jiv = j[ji]
-                    let ne = document.createElement(`${ji}`)
+                    
+                    let ne = document.createElement(`${isNan(ji) ? ji : "_" + ji + "_" }`)
                     x.append(ne)   
                     if(typeof(jiv) == "object") {
                         //ne.append(  )                        
