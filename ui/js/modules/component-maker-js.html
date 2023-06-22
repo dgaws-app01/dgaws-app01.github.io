@@ -272,7 +272,7 @@
 
                     if (typ == "array") {
                         let j2 = j[kidName] = []
-                        //let grandKidsArr = [...grandKids]
+                        
                         grandKids.forEach(grandKid => {
                             
                             if (grandKid.children.length == 0) {
@@ -295,12 +295,7 @@
                     else {
                         assignAtomicValue(typ, kid, j, kidName)
 
-                        // if (typ == "number")
-                        //     j[kidName] = kid.textContent * 1
-                        // else if (typ == "boolean")
-                        //     j[kidName] = kid.textContent == "true"
-                        // else
-                        //     j[kidName] = kid.textContent
+                        
 
                     }
                 }
