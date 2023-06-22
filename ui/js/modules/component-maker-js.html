@@ -207,7 +207,11 @@
 
                     let ne = document.createElement(`${isNaN(ji) ? ji : "_" + ji + "_"}`)
                     x.append(ne)
-                    if (typeof (jiv) == "object") {
+                    if (Array.isArray(jiv)){
+                        ne.setAttribute("array", "true")
+                        j2x(jiv, ne)
+                    }
+                    else if (typeof (jiv) == "object") {
                         j2x(jiv, ne)
                     }
                     else {
@@ -222,24 +226,32 @@
         xml2json(x) {
             let jj = {}
             if (!x) x = this.#xml
+            /** 
+             * @param {XMLDocument} x
+             */
             let x2j = (x, j) => {
                 let kids = x.children
-
                 for (let kidI in kids) {
-                    let kid = kids[kidI]
-                    console.log(kid.children)
-                    if (kid.children?.length > 0) {
+                    let kid = kids[kidI]                    
+                    let grandKids = kid.children
+                    console.log({nodeName: kid.nodeName, children: grandKids })
+
+                    if (grandKids?.length > 0) {                        
                         let j2 = {}
+                        if(grandKids[0].nodeName == "_0_") j2 = []                        
                         j[x.nodeName] = j2
                         x2j(kid.children, j2)
 
                     }
                     else {
-                        j[kid.nodeName] = kid.textContent
+                       if(kid?.nodeName?.startsWith("_"))
+                            j[ kid.nodeName.replaceAll("_", "") * 1 ] = j[kid.nodeName] = kid.textContent
+                        else
+                            j[kid.nodeName] = kid.textContent
                     }
                 }
             }
-            x2j(x)
+            x2j(x, jj)
             return jj
         }
 
