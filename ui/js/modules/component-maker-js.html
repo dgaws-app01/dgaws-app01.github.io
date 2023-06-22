@@ -235,8 +235,8 @@
             j2x(j, x)
         }
 
-        xml2json(x) {
-            let jj = {}
+        xml2json(x, jj) {
+            //let jj = {}
             if (!x) x = this.#xml
             /** 
              * @param {XMLDocument} x
@@ -301,7 +301,7 @@
                 }
             }
             x2j(x, jj)
-            return jj
+            //return jj
         }
 
     }
@@ -336,5 +336,12 @@
     let x = observer1.xml
     observer1.json2xml(data)
     x
+
+    let pth = "gates._0_.airlines._0_.name"
+    let pths = pth.split(".")
+    let xpth = `//${pths.map(p=> `*[local-name()="${p}"]`).join("/")}` 
+    let res = x.ownerDocument.evaluate(xpth, x.ownerDocument, null, XPathResult.ANY_TYPE, null)
+    let key = res.iterateNext()
+    console.log(key.textContent)
 
 </script>
