@@ -204,14 +204,25 @@
             let j2x = (j, x, v) => {
                 for (let ji in j) {
                     let jiv = j[ji]
+                    let xmlifyJsonKey = (jsonKey) => {
+                        if(isNaN(jsonKey))
+                            return [...jsonKey].map(c=> c.charCodeAt(0)>=65 && c.charCodeAt(0)<=90? `-${c.toLowerCase()}` : c).join("")
+                        else
+                            return `_${jsonKey}_`
+                    }
+                    //let tag = [...ji].map(c=> c.charCodeAt(0)>=65 && c.charCodeAt(0)<=90? `-${c.toLowerCase()}` : c).join("")
+                    //tag = `${isNaN(ji) ? tag : "_" + ji + "_"}`
 
-                    let ne = document.createElement(`${isNaN(ji) ? ji : "_" + ji + "_"}`)
+                    let tag = xmlifyJsonKey(ji)
+
+                    let ne = document.createElement(tag)
                     x.append(ne)
                     if (Array.isArray(jiv)){
                         ne.setAttribute("array", "true")
                         j2x(jiv, ne)
                     }
                     else if (typeof (jiv) == "object") {
+                        ne.setAttribute("object", "true")
                         j2x(jiv, ne)
                     }
                     else {
@@ -229,25 +240,39 @@
             /** 
              * @param {XMLDocument} x
              */
-            let x2j = (x, j) => {
-                let kids = x.children
+            let x2j = (x, j, p) => {
+                let kids = [...x.children]
                 for (let kidI in kids) {
                     let kid = kids[kidI]                    
-                    let grandKids = kid.children
-                    console.log({nodeName: kid.nodeName, children: grandKids })
+                    let grandKids = [...kid.children]                    
+                    let jsonifyTagName = (tag) => {
+                        let re = /[-].{1}/g                        
+                        return tag.replaceAll(re, 
+                            (a,b,c)=> {
+                                return a.replace("-", "").toUpperCase()
+                            }
+                        )
+                    }
+                    //console.log({p, kids, kid, kidName, children: grandKids })
+                    
+                    let kidName = jsonifyTagName(kid.nodeName)                    
 
-                    if (grandKids?.length > 0) {                        
-                        let j2 = {}
-                        if(grandKids[0].nodeName == "_0_") j2 = []                        
-                        j[x.nodeName] = j2
-                        x2j(kid.children, j2)
+                    if(kid.hasAttribute("array")){
+                        let j2 = j[kidName] = []
+                        //let grandKidsArr = [...grandKids]
+                        grandKids.forEach( grandKid=> {
+                            let j3 = {}
+                            j2.push(j3)
+                            x2j(grandKid, j3, grandKid.parentElement)
+                        })
+                    }
+                    else if(kid.hasAttribute("object")){
+                        let j2 = j[kidName] = {}
+                        x2j(kid, j2, kid.parentElement)
 
                     }
-                    else {
-                       if(kid?.nodeName?.startsWith("_"))
-                            j[ kid.nodeName.replaceAll("_", "") * 1 ] = j[kid.nodeName] = kid.textContent
-                        else
-                            j[kid.nodeName] = kid.textContent
+                    else{
+                        j[kidName] = kid.textContent
                     }
                 }
             }
@@ -264,7 +289,7 @@
     let data = {
         portName: "ddj",
         addr: "dum dum",
-        codes: ["DDU", "CCU"],
+        codesOfAirport: ["DDU", "CCU"],
         gates: [
             {
                 no: 1,
@@ -278,7 +303,10 @@
                 no: 2,
                 direction: "south"
             }
-        ]
+        ],
+        desk : {
+            currentAttendant : "sudhir", tillDate : "2023/10/19"
+        }
     }
     observer1.json = data
     let x = observer1.xml
