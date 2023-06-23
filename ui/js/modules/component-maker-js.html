@@ -188,11 +188,11 @@
         set json(v) { 
             this.json2xml(v, this.#xml)            
         }
-        get json() { return 
+        get json() { 
             let jret = {}
             this.xml2json(this.#xml, jret)
             return jret
-        }
+        }        
 
         //set xml(v){ this.#json = v } 
         get xml() { return this.#xml }
@@ -279,8 +279,7 @@
                     if (typ == "array") {
                         let j2 = j[kidName] = []
                         
-                        grandKids.forEach(grandKid => {
-                            
+                        grandKids.forEach(grandKid => {                            
                             if (grandKid.children.length == 0) {
                                 assignAtomicValue(grandKid.getAttribute("type"), grandKid, j2)
                             }
@@ -367,14 +366,9 @@
     }
     observer1.json = data
     let x = observer1.xml
-    observer1.json2xml(data)
+    //observer1.json2xml(data)
     x
 
-    let pth = "gates._0_.airlines._0_.name"
-    let pths = pth.split(".")
-    let xpth = `//${pths.map(p=> `*[local-name()="${p}"]`).join("/")}` 
-    let res = x.ownerDocument.evaluate(xpth, x.ownerDocument, null, XPathResult.ANY_TYPE, null)
-    let key = res.iterateNext()
-    console.log(key.textContent)
+    
 
 </script>
