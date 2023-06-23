@@ -169,7 +169,7 @@
 
 
     class DataObserver {
-        #json
+        //#json
         #xml
         #tree
         #observer
@@ -185,8 +185,14 @@
             this.createObserver()
         }
 
-        set json(v) { this.#json = v }
-        get json() { return this.#json }
+        set json(v) { 
+            this.json2xml(v, this.#xml)            
+        }
+        get json() { return 
+            let jret = {}
+            this.xml2json(this.#xml, jret)
+            return jret
+        }
 
         //set xml(v){ this.#json = v } 
         get xml() { return this.#xml }
@@ -302,6 +308,33 @@
             }
             x2j(x, jj)
             //return jj
+        }
+
+        xqry(xp, x){
+            //let pth = "gates._0_.airlines._0_.name"    
+            if (!x) x = this.#xml
+            if(x){
+                let pths = xp.split(".")
+                let xpth = `//${pths.map(p=> `*[local-name()="${p}"]`).join("/")}` 
+                let res = x.ownerDocument.evaluate(xpth, x.ownerDocument, null, XPathResult.ANY_TYPE, null)
+                let xres = []
+                let nxt 
+                while(nxt = res.iterateNext()) xres.push(nxt)    
+                if(xres.length==0)
+                    return
+                if(xres.length==1)
+                    return xres[0]
+                return xres
+            }
+            
+        }
+
+        jqry(q, x){
+            let xqres = this.xqry(q, x)
+            let jres = {}
+            this.xml2json(xqres, jres)
+            return jres
+            
         }
 
     }
