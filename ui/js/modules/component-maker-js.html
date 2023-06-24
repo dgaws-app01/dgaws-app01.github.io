@@ -277,8 +277,7 @@
                     let typ = kid.getAttribute("type")
 
                     if (typ == "array") {
-                        let j2 = j[kidName] = []
-                        
+                        let j2 = j[kidName] = []                        
                         grandKids.forEach(grandKid => {                            
                             if (grandKid.children.length == 0) {
                                 assignAtomicValue(grandKid.getAttribute("type"), grandKid, j2)
@@ -299,9 +298,6 @@
                     }
                     else {
                         assignAtomicValue(typ, kid, j, kidName)
-
-                        
-
                     }
                 }
             }
@@ -329,7 +325,8 @@
         }
 
         jqry(q, x){
-            let xqres = this.xqry(q, x)
+            let qj = q.replaceAll("[", "._").replaceAll("]", "_")
+            let xqres = this.xqry(qj, x)
             let jres = {}
             this.xml2json(xqres, jres)
             return jres
