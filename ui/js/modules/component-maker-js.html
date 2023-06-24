@@ -220,9 +220,13 @@
                     //tag = `${isNaN(ji) ? tag : "_" + ji + "_"}`
 
                     let tag = xmlifyJsonKey(ji)
-
-                    let ne = document.createElement(tag)
-                    x.append(ne)
+                    
+                    let ne = x.querySelector(tag)
+                    if(!ne){
+                        ne = document.createElement(tag)
+                        x.append(ne)
+                    }
+                    
                     if (Array.isArray(jiv)) {
                         ne.setAttribute("type", "array")
                         j2x(jiv, ne)
