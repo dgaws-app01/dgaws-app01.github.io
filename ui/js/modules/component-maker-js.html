@@ -171,7 +171,7 @@
     class DataObserver {
         //#json
         #xml
-        //  #tree = {data : {}}
+        #tree = null
         #observer
 
         createXml() {
@@ -205,9 +205,33 @@
             this.#observer.observe(this.#xml, { attributes: true, childList: true, subtree: true, attributeOldValue: true })
         }
 
+        generateTree(jj){
+            let data = jj || {}
+            let t = this.#tree = {}
+            if(Object.keys(data).length==0)
+                this.xml2json(this.#xml, data)
+            let j2t = (j, t) => {
+                for(k in j){
+                    let o = j[k]
+                    if(Array.isArray(o)){
+                        let a1 = t[k] = []
+                        
+                    }else if(typeof (o) == "object"){
+
+                    }else{
+
+                    }
+                }
+            }
+
+            j2t(data, t)
+
+
+        }
+
         json2xml(j, x) {
             if (!x) x = this.#xml
-            let j2x = (j, x, v) => {
+            let j2x = (j, x) => {
                 for (let ji in j) {
                     let jiv = j[ji]
                     let xmlifyJsonKey = (jsonKey) => {
@@ -225,24 +249,28 @@
                     if(!ne){
                         ne = document.createElement(tag)
                         x.append(ne)
-                    }
+                    }                    
                     
                     if (Array.isArray(jiv)) {
-                        ne.setAttribute("type", "array")
+                        ne.setAttribute("type", "array")                          
                         j2x(jiv, ne)
+                        
                     }
                     else if (typeof (jiv) == "object") {
                         ne.setAttribute("type", "object")
                         j2x(jiv, ne)
                     }
                     else {
-                        ne.setAttribute("type", jiv ? typeof (jiv) : "")
+                        ne.setAttribute("type", jiv?typeof(jiv) : "")
                         ne.textContent = jiv
                     }
 
                 }
             }
             j2x(j, x)
+
+            if(!this.#tree) this.generateTree(j)
+
         }
 
         xml2json(x, jj) {
@@ -337,7 +365,24 @@
             
         }
 
-        
+        modify(x, j){
+            let me = this
+            let j2x = me.json2xml
+            let x2j = me.xml2json            
+            if(typeof(x)=="string"){
+                x = me.xqry(x)
+            }
+            if(x instanceof Node)
+                if( x.getAttribute("type")=="array"){
+                    let lstChTg = x.lastChild.nodeName.replaceAll("_", "")
+                    console.log(lstChTg)
+                    lstChTg = lstChTg * 1
+                    if(Array.isArray(j)){
+
+                    }
+                }
+            j2x(j, x)
+        }
 
     }
 
@@ -371,6 +416,7 @@
     let x = observer1.xml
     //observer1.json2xml(data)
     x
+    observer1.modify("desk", {brdg: "tala", stns : [{ttl : "tl stn", platfCount: 3}, {ttl : "mjt stn"}], pins : ["lion", "king"]})
 
     
 
