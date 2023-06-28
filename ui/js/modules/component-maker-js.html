@@ -373,6 +373,23 @@
                 else
                     return `_${jsonKey}_`
             }
+            let getAtomicValue = (_nd) => {
+                let _t = _nd.getAttribute("type")
+                let vl = _nd.textContent
+                if (_t == "null")
+                    vl = null
+                else if (_t == "number")
+                    vl = vl * 1
+                else if (_t == "boolean")
+                    vl = vl == "true"
+                else if (_t == "object")
+                    vl = "{OBJ}"
+                else if (_t == "array")
+                    vl = "{ARR}"
+
+
+                return vl
+            }
             let j2x = (j, x, t) => {
 
                 for (let ji in j) {
@@ -392,6 +409,13 @@
                     if (jiv == null) {
                         ne.setAttribute("type", "null")
                         ne.textContent = ""
+                        Object.defineProperty(t, ji, {
+                            enumerable: true, configurable: true,
+                            get() { return getAtomicValue(ne) },
+                            set(v) {                                 
+                                j2x(v, ne, ) 
+                            }
+                        })
                     }
                     else if (Array.isArray(jiv)) {
                         ne.setAttribute("type", "array")
@@ -409,7 +433,7 @@
 
                 }
             }
-            j2x(j, x, )
+            j2x(j, x, t)
 
             //if (!this.#tree) this.generateTree(j)
 
