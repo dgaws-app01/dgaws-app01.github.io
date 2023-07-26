@@ -1,0 +1,59 @@
+<html>
+
+<head>
+
+
+  <script aria-label="Script-Loader" defer>
+    async function loadScripts() {
+
+      let scriptsList = ["ui/js/modules/component-maker-js.html", "ui/js/app-js.html"]
+      for (let si = 0; si < scriptsList.length; si++) {
+        try {
+          let script = await fetch(scriptsList[si])
+          let scriptContent = await script.text()
+          let domParser = new DOMParser()
+          let scriptDom = domParser.parseFromString(scriptContent, "text/html")
+
+          let script2BeIneserted = scriptDom.head.querySelector("script")
+          let scriptContent2BeInserted = script2BeIneserted.textContent //.replaceAll("<br>", "")
+          let scriptLabel = script2BeIneserted.getAttribute("aria-label")
+          let newScriptNode = document.createElement("script")
+          newScriptNode.textContent = scriptContent2BeInserted
+          newScriptNode.setAttribute("aria-label", scriptLabel)
+          document.head.appendChild(newScriptNode)
+
+          window.setTimeout(() => newScriptNode.remove(), 2000)
+
+        }
+        catch (err) {
+          console.log(err)
+        }
+
+
+      }
+
+      window.setTimeout(() => {
+        let scriptLoader = document.querySelector("script[aria-label]")
+        scriptLoader.remove()
+      }, 2000)
+
+    }
+
+    loadScripts()
+
+
+  </script>
+  <script>
+
+  </script>
+  <!-- <script src="./ui/js/app.js" defer type="module"></script> -->
+</head>
+
+<body>
+  <div>
+    Hello
+    <c-test-1></c-test-1>
+  </div>
+</body>
+
+</html>
