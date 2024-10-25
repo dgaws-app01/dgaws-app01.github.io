@@ -21,13 +21,13 @@ var logx_err = (m) => {
 }
 
 var ext_init = () => {
-    tableau.extensions.initializeAsync().then(t=> {
+    tableau.extensions.initializeAsync().then(function(){
         var dashboard = tableau.extensions.dashboardContent;
         logx_json(dashboard)
         logx("Initialized !")
-    }).catch(c => 
-        logx_err(c)
-    )
+    }, function(r){
+        logx_err(r)
+    })
 }
 
 document.onreadystatechange = (t, ev) => {
