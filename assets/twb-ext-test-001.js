@@ -12,3 +12,7 @@ var log_test_obj = (o)=> {
     Object.getOwnPropertyNames().forEach(p=> op.push(p))
     logx(op)
 }
+
+document.onreadystatechange(rev=> {
+    logx(rev)
+})
