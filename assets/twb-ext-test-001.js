@@ -18,7 +18,8 @@ var logx_obj = (o)=> {
 
 var ext_init = () => {
     tableau.extensions.initializeAsync().then(t=> {
-        logx_json(t)
+        var dashboard = tableau.extensions.dashboardContent.dashboard;
+        logx_json(dashboard)
     })
 }
 
