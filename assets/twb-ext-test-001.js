@@ -48,9 +48,9 @@ var ext_init = () => {
     tableau.extensions.initializeAsync().then(function(){
         try{
             logx("Initialized !")
-            let dashboard = tableau.extensions.dashboardContent;            
-            let dashboard2 = obj_expand(dashboard, 2)            
-            logx_json(dashboard2)
+            let dashboard = tableau.extensions.dashboardContent.dashboard.name;            
+            //let dashboard2 = obj_expand(dashboard, 2)            
+            logx(`You are now on ${dashboard}`)
             //logx(dashboard2.length)
             
         }catch(ex1){
