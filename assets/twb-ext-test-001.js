@@ -1,6 +1,8 @@
 var logx = (x) => {
     let logger = document.getElementById("logger")
-    logger.innerText = x
+    //let itxt = logger.innerText
+    //itxt = `${logger.innerText}\n${Date.now()} ● ${x}`
+    logger.innerText = `${logger.innerText}\n${Date.now()} ● ${x}`
 }
 
 var logx_json = (x)=> {    
@@ -14,6 +16,5 @@ var logx_obj = (o)=> {
 }
 
 document.onreadystatechange = (t, ev) => {
-    logx_json(ev)
+    logx_json(document.readyState)
 }
-alert("2024-10-25 17:10")
