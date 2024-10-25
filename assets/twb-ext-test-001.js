@@ -25,6 +25,7 @@ var obj_expand = (o, mx_lvl=3, z, p0, lvl)=>{
     if(z==undefined) z = []    
     try{  
         for (let p in o){            
+            if(!p.startsWith("_")){
                 let v = o[p]
                 let p1 = `${p0==undefined?"":p0+"."}${p}`
                 let isPrem = !(["String", "Number", "Date", "Boolean"].findIndex(t=> t==v?.constructor?.name) == -1)
@@ -35,6 +36,8 @@ var obj_expand = (o, mx_lvl=3, z, p0, lvl)=>{
                 if( !isPrem && lvl <= mx_lvl  )
                     obj_expand(v, mx_lvl, z, p1, lvl+1)            
             }
+            
+        }
     }catch(ex1){
         z.push[{p0: `-ERROR- ${ex1}`}]
     }
