@@ -22,8 +22,8 @@ var logx_err = (m) => {
 
 var ext_init = () => {
     tableau.extensions.initializeAsync().then(function(){
-        var dashboard = tableau.extensions.dashboardContent;
-        logx_json(dashboard)
+        let dashboard = tableau.extensions.dashboardContent;
+        logx_obj(dashboard)
         logx("Initialized !")
     }, function(r){
         logx_err(r)
