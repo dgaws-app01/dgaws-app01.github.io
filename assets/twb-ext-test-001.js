@@ -16,3 +16,5 @@ var log_test_obj = (o)=> {
 document.onreadystatechange(rev=> {
     logx(rev)
 })
+
+alert("2024-10-25 17:07")
