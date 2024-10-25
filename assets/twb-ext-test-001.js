@@ -28,21 +28,25 @@ var obj_expand = (o, z, p0)=>{
         let p1 = `${p0==undefined?"":p0+"."}${p}`
         zo = {}        
         zo[p1] = v
-        z.push(zo)
-        //obj_expand(v, z, p)
+        z.push(zo)        
         if( ["String", "Number", "Date", "Boolean"].findIndex(t=> t==v?.constructor?.name) == -1 )
-            obj_expand(v, z, p1)
-            //console.log((v).constructor.name)
+            obj_expand(v, z, p1)            
     }
     return z
 }
 
 var ext_init = () => {
     tableau.extensions.initializeAsync().then(function(){
-        let dashboard = tableau.extensions.dashboardContent;
-        let dashboard2 = obj_expand(dashboard)
-        logx_json(dashboard2)
-        logx("Initialized !")
+        try{
+            let dashboard = tableau.extensions.dashboardContent;
+            logx("Initialized !")
+            let dashboard2 = obj_expand(dashboard)            
+            //logx_json(dashboard2)
+            logx(dashboard2.length)
+            
+        }catch(ex1){
+            logx_err(`Initialized but ... ${ex1}`)    
+        }
     }, function(r){
         logx_err(r)
     })
