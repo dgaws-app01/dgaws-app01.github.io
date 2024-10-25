@@ -16,6 +16,15 @@ var logx_obj = (o)=> {
     logx(op)
 }
 
+var ext_init = () => {
+    tableau.extensions.initializeAsync().then(t=> {
+        logx_json(t)
+    })
+}
+
 document.onreadystatechange = (t, ev) => {
-    logx_json(document.readyState)
+    if(document.readyState=="complete"){
+        logx_json("Initializing Extension ...")
+        ext_init()
+    }    
 }
