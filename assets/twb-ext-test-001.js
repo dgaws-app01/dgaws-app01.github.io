@@ -24,14 +24,15 @@ var obj_expand = (o, mx_lvl=3, z, p0, lvl)=>{
     if(lvl==undefined) lvl = 0
     if(z==undefined) z = []    
     try{  
-        for (let p in o){
-            
+        for (let p in o){            
                 let v = o[p]
                 let p1 = `${p0==undefined?"":p0+"."}${p}`
+                let isPrem = !(["String", "Number", "Date", "Boolean"].findIndex(t=> t==v?.constructor?.name) == -1)
                 zo = {}        
-                zo[p1] = v
+                if(isPrem) zo[p1] = v                
+                else zo[p1] = `-OBJ-${v?.constructor?.name}`
                 z.push(zo)        
-                if( ["String", "Number", "Date", "Boolean"].findIndex(t=> t==v?.constructor?.name) == -1 && lvl <= mx_lvl  )
+                if( !isPrem && lvl <= mx_lvl  )
                     obj_expand(v, mx_lvl, z, p1, lvl+1)            
             }
     }catch(ex1){
