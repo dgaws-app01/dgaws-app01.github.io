@@ -16,11 +16,17 @@ var logx_obj = (o)=> {
     logx(op)
 }
 
+var logx_err = (m) => {
+    logx(`-ERROR- ▪ ${m}`)
+}
+
 var ext_init = () => {
     tableau.extensions.initializeAsync().then(t=> {
         var dashboard = tableau.extensions.dashboardContent.dashboard;
         logx_json(dashboard)
-    })
+    }).catch(c => 
+        logx_err(c)
+    )
 }
 
 document.onreadystatechange = (t, ev) => {
