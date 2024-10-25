@@ -44,7 +44,7 @@ var ext_init = () => {
         try{
             logx("Initialized !")
             let dashboard = tableau.extensions.dashboardContent;            
-            let dashboard2 = obj_expand(dashboard)            
+            let dashboard2 = obj_expand(dashboard, 1)            
             //logx_json(dashboard2)
             logx(dashboard2.length)
             
