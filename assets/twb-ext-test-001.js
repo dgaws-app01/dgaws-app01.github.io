@@ -3,18 +3,17 @@ var logx = (x) => {
     logger.innerText = x
 }
 
-var log_test_as_json = (x)=> {    
+var logx_json = (x)=> {    
     logx(JSON.stringify(x))
   }
 
-var log_test_obj = (o)=> {
+var logx_obj = (o)=> {
     let op = []
     Object.getOwnPropertyNames().forEach(p=> op.push(p))
     logx(op)
 }
 
-document.onreadystatechange(rev=> {
-    logx(rev)
-})
-
-alert("2024-10-25 17:07")
+document.onreadystatechange = (t, ev) => {
+    logx_json(ev)
+}
+alert("2024-10-25 17:10")
