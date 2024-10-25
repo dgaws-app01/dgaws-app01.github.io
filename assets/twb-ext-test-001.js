@@ -20,17 +20,17 @@ var logx_err = (m) => {
     logx(`-ERROR- ▪ ${m}`)
 }
 
-var obj_expand = (o, z, p0)=>{
-    if(z==undefined)
-        z = []
+var obj_expand = (o, mx_lvl=3, z, p0, lvl)=>{
+    if(lvl==undefined) lvl = 0
+    if(z==undefined) z = []    
     for (let p in o){
         let v = o[p]
         let p1 = `${p0==undefined?"":p0+"."}${p}`
         zo = {}        
         zo[p1] = v
         z.push(zo)        
-        if( ["String", "Number", "Date", "Boolean"].findIndex(t=> t==v?.constructor?.name) == -1 )
-            obj_expand(v, z, p1)            
+        if( ["String", "Number", "Date", "Boolean"].findIndex(t=> t==v?.constructor?.name) == -1 && lvl <= mx_lvl  )
+            obj_expand(v, mx_lvl, z, p1, lvl+1)            
     }
     return z
 }
@@ -38,8 +38,8 @@ var obj_expand = (o, z, p0)=>{
 var ext_init = () => {
     tableau.extensions.initializeAsync().then(function(){
         try{
-            let dashboard = tableau.extensions.dashboardContent;
             logx("Initialized !")
+            let dashboard = tableau.extensions.dashboardContent;            
             let dashboard2 = obj_expand(dashboard)            
             //logx_json(dashboard2)
             logx(dashboard2.length)
